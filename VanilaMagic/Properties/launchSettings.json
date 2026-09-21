@@ -1,0 +1,18 @@
+{
+  "profiles": {
+    "VanilaMagic": {
+      "commandName": "Project",
+      "commandLineArgs": "-console",
+      "workingDirectory": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim",
+      "nativeDebugging": false,
+      "sqlDebugging": false,
+      "jsWebView2Debugging": false
+    },
+    "Profile 1": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim\\valheim.exe",
+      "commandLineArgs": "-console",
+      "workingDirectory": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim"
+    }
+  }
+}

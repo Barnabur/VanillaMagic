@@ -1,0 +1,10 @@
+{
+  "name": "VanilaMagic",
+  "description": "Early-game magic for Valheim: eitr foods, wands and wraith armor.",
+  "version_number": "0.0.1",
+  "website_url": "",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2333",
+    "ValheimModding-Jotunn-2.30.2"
+  ]
+}
