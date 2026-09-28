@@ -235,7 +235,22 @@ namespace VanilaMagic.Items
             flicker.m_fadeInDuration = 0f;
         }
 
-        /// <summary>Wegetacja Czarnego Lasu - wartosci z wersji bundlowej moda.</summary>
+        // Dodatkowe biomy poza Czarnym Lasem: (biom, max, min wysokosc, max krzakow w grupie).
+        // Max < 1 = szansa na jedna grupe w strefie (ZoneSystem.PlaceVegetation).
+        // Na bagnie teren lezy tuz nad woda - 0.5 jak waniliowe firtree_small_dead_swamp.
+        private static readonly (Heightmap.Biome biome, float max, float minAltitude, int groupSizeMax)[] ExtraBiomes =
+        {
+            (Heightmap.Biome.Swamp, 0.5f, 0.5f, 3),
+            (Heightmap.Biome.Plains, 0.2f, 1f, 2),
+        };
+
+        private static CustomVegetation _blackForestVegetation;
+
+        /// <summary>
+        /// Wegetacja: Czarny Las przez Jotunna (60% szans na grupe w strefie, dla porownania waniliowe
+        /// borowki maja 1-1 grup, maliny 1-2, moroszki 1-3). Jotunn trzyma jeden wpis na prefab,
+        /// wiec bagno i rowniny to klony tego wpisu dokladane recznie do ZoneSystem.m_vegetation.
+        /// </summary>
         private static void AddVegetation(GameObject bush)
         {
             var config = new VegetationConfig
@@ -244,13 +259,35 @@ namespace VanilaMagic.Items
                 BlockCheck = true,
                 MinAltitude = 1f,
                 MaxAltitude = 100f,
-                Max = 10,
+                Max = 0.6f,
                 ScaleMin = 1f,
                 ScaleMax = 1.5f,
-                GroupSizeMin = 2,
+                GroupSizeMin = 1,
                 GroupSizeMax = 4,
+                GroupRadius = 5f,
             };
-            ZoneManager.Instance.AddCustomVegetation(new CustomVegetation(bush, false, config));
+            _blackForestVegetation = new CustomVegetation(bush, false, config);
+            ZoneManager.Instance.AddCustomVegetation(_blackForestVegetation);
+            ZoneManager.OnVegetationRegistered += AddExtraBiomeVegetation;
+        }
+
+        /// <summary>Odpala sie przy kazdym SetupLocations (kazdy swiat) - pomijamy wpisy, ktore juz sa.</summary>
+        private static void AddExtraBiomeVegetation()
+        {
+            var vegetation = ZoneSystem.instance.m_vegetation;
+            foreach (var (biome, max, minAltitude, groupSizeMax) in ExtraBiomes)
+            {
+                var name = $"{BushName}_{biome}";
+                if (vegetation.Exists(v => v.m_name == name)) continue;
+
+                var veg = _blackForestVegetation.Vegetation.Clone();
+                veg.m_name = name;
+                veg.m_biome = biome;
+                veg.m_max = max;
+                veg.m_minAltitude = minAltitude;
+                veg.m_groupSizeMax = groupSizeMax;
+                vegetation.Add(veg);
+            }
         }
     }
 }

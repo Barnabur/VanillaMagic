@@ -11,14 +11,17 @@ namespace VanilaMagic.Items
     /// <summary>
     /// Ghostshake - bagienny odpowiednik Shocklate Smoothie (kociol lvl 2, 1 "maz" + 4 jagody),
     /// tylko pod magie: 1 Ektoplazma + 4 Wildberry zamiast Ooze + maliny/jagody.
-    /// Statystyki tez sa przelozeniem smoothie: ta sama sytosc i czas trawienia, ale wiekszosc
-    /// bonusu ze staminy idzie w eitr - to pierwsze prawdziwe jedzenie na eitr w progresji.
-    /// Ikona jest wlasna (Assets/GhostShake.png), model to waniliowy smoothie z tekstura
-    /// przemalowana w runtime na upiorna zielen - do wymiany, gdy bedzie wlasna tekstura.
+    /// Statystyki: ten sam czas trawienia co smoothie, ale tylko 5 hp - bonus idzie w stamine
+    /// i eitr; to pierwsze prawdziwe jedzenie na eitr w progresji.
+    /// Ikona jest wlasna (Assets/GhostShake.png). Model: waniliowy smoothie z bundla
+    /// "vanilamagic" - mesh GhostShake_mesh (bez borowek, sama truskawka) i albedo GhostShake_d
+    /// (mietowy krem, fioletowy owoc, kubek bez zmian) - patrz ModAssets. Gdy bundla brak,
+    /// zostaje stary fallback: waniliowy model z tekstura przemalowana w runtime (Ghostify).
     /// Zrodlo ektoplazmy przenosi EctoplasmDrops (Wraith zamiast Ghosta).
     /// </summary>
     internal static class GhostShake
-    {
+ 
+     {
         public const string ItemName = "GhostShake";
         private const string BaseName = "ShocklateSmoothie";
 
@@ -68,15 +71,20 @@ namespace VanilaMagic.Items
             var shared = item.ItemDrop.m_itemData.m_shared;
 
             // Shocklate Smoothie: 16 hp / 50 stamina / 0 eitr, regen 1, 1200 s.
-            // UWAGA: m_food MUSI byc > 0 - Player.ConsumeItem wola EatFood tylko wtedy.
-            shared.m_food = 16f;
+            // Ghostshake: symboliczne 5 hp - prawie caly bonus idzie w stamine i eitr.
+            // (m_food == 0 wymagaloby patcha HealthlessFood - wanilia wola EatFood tylko przy m_food > 0.)
+            shared.m_food = 5f;
             shared.m_foodStamina = 20f;
             shared.m_foodEitr = 40f;
             shared.m_foodRegen = 1f;
             shared.m_foodBurnTime = 1200f;
             shared.m_maxStackSize = 10;
 
-            Ghostify(item.ItemPrefab);
+            if (!ModAssets.ApplyModel(item.ItemPrefab, "GhostShake_mesh", "GhostShake_d"))
+            {
+                Jotunn.Logger.LogWarning("GhostShake: brak modelu w bundlu - zostaje przemalowana wanilia");
+                Ghostify(item.ItemPrefab);
+            }
 
             var icon = RuntimeTextures.LoadIcon(ItemName);
             if (icon) shared.m_icons = new[] { icon };
@@ -86,7 +94,7 @@ namespace VanilaMagic.Items
             ItemManager.Instance.AddItem(item);
         }
 
-        /// <summary>Przemalowuje materialy klona (czekoladowy braz -> widmowa zielen).</summary>
+        /// <summary>Fallback bez bundla: przemalowuje materialy klona (czekoladowy braz -> widmowa zielen).</summary>
         private static void Ghostify(GameObject prefab)
         {
             var recolored = new Dictionary<Texture, Texture2D>();

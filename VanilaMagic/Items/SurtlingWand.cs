@@ -25,6 +25,13 @@ namespace VanilaMagic.Items
         // Wartosci przeniesione 1:1 z recznego prefabu z bundla (wand.mat + transformy dzieci)
         private static readonly Color BronzeTint = new Color(1f, 0.8994f, 0.5802f);
 
+        // ~25 DPS na q1 / ~31 na q4 (baza -32% wzgledem Crude bow + ognista strzala) - AoE, wiec ponizej broni bialej z brazu
+        private const float BluntDamage = 22f;
+        private const float FireDamage = 15f;
+        private const float FireDamagePerLevel = 3f;
+        private const float BurstInterval = 1.5f;
+        private const float AttackEitr = 10f;
+
         public static void Register()
         {
             PrefabManager.OnVanillaPrefabsAvailable += Create;
@@ -69,7 +76,7 @@ namespace VanilaMagic.Items
             SetChildScale(projectile, "flames_world", 0.4f);
 
             var proj = projectile.GetComponent<Projectile>();
-            proj.m_aoe = 1.5f;
+            proj.m_aoe = 1f;
             proj.m_hitNoise = 30f;
             ReplaceEffect(proj.m_hitEffects, "fx_fireball_staff_explosion", explosion);
             if (proj.m_spawnOnHit && proj.m_spawnOnHit.name == "fx_fireball_staff_explosion")
@@ -189,6 +196,8 @@ namespace VanilaMagic.Items
                 Icons = new[] { fireStaffShared.m_icons[0] },
                 CraftingStation = "forge",
                 RepairStation = "forge",
+                // jak waniliowa bron z brazu: kuznia 1, q4 przy kuzni 4 (era zelaza)
+                MinStationLevel = 1,
                 Requirements = new[]
                 {
                     new RequirementConfig("Bronze", 7, 2),
@@ -200,22 +209,33 @@ namespace VanilaMagic.Items
             ItemManager.Instance.AddItem(item);
 
             var shared = item.ItemDrop.m_itemData.m_shared;
-            // frost -> fire; reszta parametrow ataku (seria, rozrzut, eitr) zostaje z bazy
+            // Stan animacji ZOSTAJE "Staves": seria "staff_rapidfire" w warstwie bazowej animatora
+            // wchodzi tylko ze stanu ruchu kostura; z OneHanded InAttack() jest false i strzaly
+            // leca w losowe strony. Jednoreczny blok robi OneHandedBlock (statei tylko na czas bloku).
+            OneHandedBlock.Register(shared.m_name);
+            // balans: jeden strzal = Crude bow + ognista strzala (22 + 11 przebicia, 22 ognia) -15% i -20%,
+            // tu przebicie -> obuch (zelazna kula); z poziomem rosnie tylko ogien, jak w Staff of Embers
             shared.m_damages.m_frost = 0f;
-            shared.m_damages.m_fire = 10f;
+            shared.m_damages.m_blunt = BluntDamage;
+            shared.m_damages.m_fire = FireDamage;
             shared.m_damagesPerLevel.m_frost = 0f;
-            shared.m_damagesPerLevel.m_fire = 6f;
+            shared.m_damagesPerLevel.m_fire = FireDamagePerLevel;
             shared.m_attack.m_attackProjectile = projectile;
+            // StaffIceShards ma m_hitVariant = -1: przy ujemnym wariancie StatusEffect.TriggerStartEffects
+            // odpala WSZYSTKIE warianty vfx_Burning naraz (pomaranczowy + niebieski + zielony = bialy
+            // przeswietlony blysk). Ognista strzala i StaffFireball maja 0 = zwykly pomaranczowy ogien.
+            shared.m_hitVariant = 0;
 
             // Tempo strzalow to dana ataku, nie animacja: FireProjectileBurst odpala sie
-            // co m_burstInterval. Mnoznik 2 = polowa szybkostrzelnosci frost staffa.
+            // co m_burstInterval (baza 0.2 s). Eitr idzie per strzal (m_perBurstResourceUsage).
             var attack = shared.m_attack;
             Jotunn.Logger.LogInfo(
                 $"{prefabName}: bazowy atak StaffIceShards - bursts={attack.m_projectileBursts}, " +
                 $"interval={attack.m_burstInterval}s, pociski/burst={attack.m_projectiles}, " +
                 $"eitr={attack.m_attackEitr}, rozrzut={attack.m_projectileAccuracy}, " +
                 $"wysokosc={attack.m_attackHeight}");
-            attack.m_burstInterval *= 2f;
+            attack.m_burstInterval = BurstInterval;
+            attack.m_attackEitr = AttackEitr;
 
             // punkt startu pocisku = pozycja postaci + up * m_attackHeight (+ forward/right);
             // ~1/4 wzrostu postaci nizej, zeby kula wylatywala z rozdzki, a nie znad glowy
@@ -239,6 +259,8 @@ namespace VanilaMagic.Items
             attack.m_startEffect = new EffectList();
 
             BuildVisual(item.ItemPrefab);
+            // Render ikony DOPIERO po zlozeniu modelu - inaczej lapie golego klona bazy
+            RenderedIcons.Register(prefabName);
         }
 
         private static void BuildVisual(GameObject prefab)

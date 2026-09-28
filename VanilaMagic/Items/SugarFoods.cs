@@ -27,8 +27,10 @@ namespace VanilaMagic.Items
     /// Ikony sa wlasne (Assets/*.png), lacznie z podmienionymi ikonami DWOCH waniliowych itemow:
     /// Eyescreama (zeby odroznic go od wersji z posypka) i Frosted Sweetbreada (lukier to teraz
     /// krysztalowy cukier). Waniliowy SUROWY sweetbread zostaje nietkniety - wlasna ikone ma
-    /// tylko nasz polprodukt z cukrem. Model zwyklego Sweetbreada to wciaz klon lukrowanego
-    /// z tekstura przemalowana w runtime (zdjety lukier) - do wymiany, gdy bedzie wlasna tekstura.
+    /// tylko nasz polprodukt z cukrem. Model zwyklego Sweetbreada: klon lukrowanego z meshem
+    /// VikingCupcake_body_mesh (zdjety lukier i orzechy, wierzch z naciecien X jak chleb) i albedo
+    /// VikingCupcake_body_D z bundla "vanilamagic" (ModAssets). Bez bundla zostaje fallback:
+    /// waniliowy model z tekstura przemalowana w runtime (Unfrost).
     /// </summary>
     internal static class SugarFoods
     {
@@ -90,6 +92,7 @@ namespace VanilaMagic.Items
                 RemoveVanillaEyes();
                 ReplaceVanillaIcon(VanillaFrosted);
                 NerfVanillaFrosted();
+                RecolorVanillaFrostedSprinkles();
                 RewireOven();
             }
             catch (Exception ex)
@@ -144,7 +147,11 @@ namespace VanilaMagic.Items
             shared.m_description = "$item_sweetbread_description";
 
             SetIcon(item, RuntimeTextures.LoadIcon(SweetbreadName));
-            RecolorModel(item.ItemPrefab, Unfrost, "_plain");
+            if (!ModAssets.ApplyModel(item.ItemPrefab, "VikingCupcake_body_mesh", "VikingCupcake_body_D"))
+            {
+                Jotunn.Logger.LogWarning("SugarFoods: brak modelu Sweetbreada w bundlu - zostaje przemalowana wanilia");
+                RecolorModel(item.ItemPrefab, Unfrost, "_plain");
+            }
 
             ItemManager.Instance.AddItem(item);
         }
@@ -230,6 +237,25 @@ namespace VanilaMagic.Items
                 child.gameObject.SetActive(active);
             }
             return found;
+        }
+
+        /// <summary>
+        /// Trzy "orzechy" na lukrze waniliowego Frosted Sweetbreada staja sie niebieskimi krysztalkami
+        /// cukru - jak na podmienionej ikonie. Albedo VikingCupcake_frosted_D z bundla (wanilia z
+        /// przemalowanym regionem UV orzechow), mesh i shader zostaja waniliowe.
+        /// </summary>
+        private static void RecolorVanillaFrostedSprinkles()
+        {
+            var prefab = PrefabManager.Instance.GetPrefab(VanillaFrosted);
+            if (!prefab)
+            {
+                Jotunn.Logger.LogWarning($"SugarFoods: brak waniliowego prefabu {VanillaFrosted}");
+                return;
+            }
+            if (!ModAssets.ApplyAlbedo(prefab, "VikingCupcake_frosted_D"))
+            {
+                Jotunn.Logger.LogWarning("SugarFoods: brak tekstury krysztalkow w bundlu - orzechy zostaja waniliowe");
+            }
         }
 
         /// <summary>Lukier to teraz cukier krysztalowy: +20 eitr kosztem 10 pozostalych statow.</summary>

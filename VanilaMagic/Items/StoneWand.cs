@@ -26,16 +26,24 @@ namespace VanilaMagic.Items
         public const string PrefabName = "StoneWand";
         private const string ProjectileName = "wand_stonebolt_projectile";
 
-        // PLACEHOLDER balansu - docelowe wartosci poda Kamil
-        private const float BluntDamage = 45f;
-        private const float BluntDamagePerLevel = 6f;
+        // balans: cios ponad bron jednoreczna z czarnego metalu (95-113), okupiony
+        // ogromnym kosztem eitru - 2-3 strzaly z pelnego paska, potem trzeba czekac
+        private const float BluntDamage = 240f;
+        private const float BluntDamagePerLevel = 10f;
         private const float AttackForce = 100f;
-        private const float AttackEitr = 25f;
-        private const float ExplosionRadius = 1.5f;
+        private const float AttackEitr = 50f;
+        private const float ExplosionRadius = 2f;
         // skala wizualu glazu w pocisku (vanilla trollowy glaz ma 0.2293)
         private const float ProjectileRockScale = 0.08f;
-        // dzwiek castu (nazwa prefabu sfx)
-        private const string CastSfxName = "sfx_stonegolem_primary_start";
+        // dzwiek wystrzalu: klon sfx_troll_attack_hit (sam klip Hit_DeepHugeChestThump1 - gleboki
+        // tapniecie w piers trolla), sciszony i lekko obnizony; vanilla ma vol 1, pitch 0.9-1.1
+        private const string CastSfxName = "sfx_wandstone_cast";
+        private const string CastSfxSource = "sfx_troll_attack_hit";
+        private const float CastSfxVolume = 0.25f;
+        private const float CastSfxMinPitch = 0.75f;
+        private const float CastSfxMaxPitch = 0.85f;
+        // opoznienie odtworzenia od momentu castu (sekundy); ZSFX losuje z min-max
+        private const float CastSfxDelay = 0.4f;
 
         public static void Register()
         {
@@ -117,6 +125,8 @@ namespace VanilaMagic.Items
                 Icons = new[] { iconShared.m_icons[0] },
                 CraftingStation = "forge",
                 RepairStation = "forge",
+                // jak waniliowa bron z czarnego metalu: kuznia 4, q4 przy kuzni 7
+                MinStationLevel = 4,
                 Requirements = new[]
                 {
                     new RequirementConfig("BlackMetal", 5, 2),
@@ -133,6 +143,9 @@ namespace VanilaMagic.Items
             shared.m_damages = new HitData.DamageTypes { m_blunt = BluntDamage };
             shared.m_damagesPerLevel = new HitData.DamageTypes { m_blunt = BluntDamagePerLevel };
             shared.m_attackForce = AttackForce;
+            // Krotka rozdzka, nie kostur: idle/blok z warstwy broni jednorecznych (jak MaceSilver),
+            // a nie "Staves" po bazowym kosturze. Triggery atakow sa globalne w animatorze.
+            shared.m_animationState = ItemDrop.ItemData.AnimationState.OneHanded;
 
             var attack = shared.m_attack;
             attack.m_attackProjectile = projectile;
@@ -144,9 +157,9 @@ namespace VanilaMagic.Items
             attack.m_launchAngle -= 5f;
             Jotunn.Logger.LogInfo($"StoneWand: launchAngle={attack.m_launchAngle}, vel={attack.m_projectileVel}");
 
-            // dzwiek castu: zgrzyt skaly z poczatku ataku golema (bez glosu) zamiast ognistego "whoosh";
-            // alternatywy: sfx_greydwarf_throw (lekki rzut kamieniem), sfx_moleman_stonedust (kruszenie skaly)
-            var castSfx = PrefabManager.Instance.GetPrefab(CastSfxName);
+            // dzwiek wystrzalu: cichy, obnizony thump trolla zamiast ognistego "whoosh";
+            // alternatywy: sfx_stonegolem_primary_start (zgrzyt skaly), sfx_greydwarf_throw (lekki rzut kamieniem)
+            var castSfx = BuildCastSfx();
             if (castSfx)
             {
                 shared.m_startEffect = new EffectList
@@ -156,10 +169,43 @@ namespace VanilaMagic.Items
             }
             else
             {
-                Jotunn.Logger.LogWarning($"StoneWand: brak {CastSfxName} - zostaje dzwiek fire staffa");
+                Jotunn.Logger.LogWarning($"StoneWand: brak {CastSfxSource} - zostaje dzwiek fire staffa");
             }
 
             BuildVisual(item.ItemPrefab);
+            // Render ikony DOPIERO po zlozeniu modelu - inaczej lapie golego klona bazy
+            RenderedIcons.Register(PrefabName);
+        }
+
+        /// <summary>
+        /// Klon sfx_troll_attack_hit (ZSFX + AudioSource + ZNetView + CamShaker) z jednym klipem
+        /// Hit_DeepHugeChestThump1. Glosnosc na 25%, pitch obnizony, bez trzesienia kamery
+        /// (to hit trolla w gracza, nie strzal). Klip bierzemy z wanilii, wiec nic nie wozimy w bundlu.
+        /// </summary>
+        private static GameObject BuildCastSfx()
+        {
+            if (!PrefabManager.Instance.GetPrefab(CastSfxSource)) return null;
+            var sfx = PrefabManager.Instance.CreateClonedPrefab(CastSfxName, CastSfxSource);
+            var zsfx = sfx.GetComponent<ZSFX>();
+            if (!zsfx)
+            {
+                Jotunn.Logger.LogWarning($"StoneWand: klon {CastSfxSource} nie ma ZSFX");
+                return null;
+            }
+            zsfx.m_minVol = CastSfxVolume;
+            zsfx.m_maxVol = CastSfxVolume;
+            zsfx.m_minPitch = CastSfxMinPitch;
+            zsfx.m_maxPitch = CastSfxMaxPitch;
+            zsfx.m_useVibration = false;
+            zsfx.m_minDelay = CastSfxDelay;
+            zsfx.m_maxDelay = CastSfxDelay;
+            var shake = sfx.GetComponent<CamShaker>();
+            if (shake) UnityEngine.Object.DestroyImmediate(shake, true);
+
+            PrefabManager.Instance.AddPrefab(new CustomPrefab(sfx, false));
+            Jotunn.Logger.LogInfo($"StoneWand: {CastSfxName} <- {CastSfxSource}, vol={CastSfxVolume}, pitch={CastSfxMinPitch}-{CastSfxMaxPitch}, delay={CastSfxDelay}s, " +
+                $"klipy={string.Join(",", zsfx.m_audioClips.Select(c => c ? c.name : "null"))}");
+            return sfx;
         }
 
         // Wymiary (metry, wzdluz osi Y siatki): uchwyt -> szpony z kamieniem -> koniec szponow

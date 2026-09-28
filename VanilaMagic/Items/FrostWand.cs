@@ -14,7 +14,7 @@ namespace VanilaMagic.Items
     /// - pocisk: klon DvergerStaffIce_projectile (lodowa kula maga dvergrow z dymnym
     ///   ogonem; wybuch fx_DvergerMage_Ice_hit = iskry, odlamki lodu, mgla, dzwiek)
     /// - trzonek: siatka generowana w kodzie (uchwyt + podwojna spirala oplatajaca
-    ///   krysztal + szpic), material "silverbar" ze sztabki srebra
+    ///   krysztal + szpic), material pochodny od "silverbar" ze sztabki srebra (rozjasniony)
     /// - glowica: pojedynczy krysztal - dziecko "Cube" itemu Crystal (crystal_exterior),
     ///   przeskalowany po bounds siatki do CrystalLength (siatka ma ~7 jednostek, nie 1)
     /// - efekty: niebieski flare i sniezynki z efektow StaffIceShards
@@ -25,11 +25,12 @@ namespace VanilaMagic.Items
         public const string PrefabName = "FrostWand";
         private const string ProjectileName = "wand_frostbolt_projectile";
 
-        // PLACEHOLDER balansu - docelowe wartosci poda Kamil (ma byc ~ luk z lodowa strzala)
-        private const float FrostDamage = 30f;
-        private const float FrostDamagePerLevel = 5f;
-        private const float AttackEitr = 25f;
-        private const float ExplosionRadius = 2f;
+        // balans: tempo i eitr jak Staff of Embers (baza StaffFireball, 35 eitr), obrazenia
+        // ~40% jego 240 - AoE, wiec celowo ponizej srebrnej broni bialej na jednym celu
+        private const float FrostDamage = 90f;
+        private const float FrostDamagePerLevel = 6f;
+        private const float AttackEitr = 35f;
+        private const float ExplosionRadius = 1.3f;
 
         public static void Register()
         {
@@ -87,10 +88,14 @@ namespace VanilaMagic.Items
                 Icons = new[] { iceStaffShared.m_icons[0] },
                 CraftingStation = "forge",
                 RepairStation = "forge",
+                // jak waniliowa bron ze srebra: kuznia 3, q4 przy kuzni 6
+                MinStationLevel = 3,
                 Requirements = new[]
                 {
                     new RequirementConfig("Silver", 5, 2),
                     new RequirementConfig("Crystal", 1, 1),
+                    // polowa gruczolow z Staff of Frost (4 +2/poziom)
+                    new RequirementConfig("FreezeGland", 2, 1),
                 },
             };
 
@@ -102,6 +107,9 @@ namespace VanilaMagic.Items
             shared.m_damages = new HitData.DamageTypes { m_frost = FrostDamage };
             shared.m_damagesPerLevel = new HitData.DamageTypes { m_frost = FrostDamagePerLevel };
             shared.m_attackForce = 40f;
+            // Krotka rozdzka, nie kostur: idle/blok z warstwy broni jednorecznych (jak MaceSilver),
+            // a nie "Staves" po StaffFireball. Trigger ataku "staff_fireball" jest globalny w animatorze.
+            shared.m_animationState = ItemDrop.ItemData.AnimationState.OneHanded;
 
             var attack = shared.m_attack;
             attack.m_attackProjectile = projectile;
@@ -129,6 +137,8 @@ namespace VanilaMagic.Items
             }
 
             BuildVisual(item.ItemPrefab);
+            // Render ikony DOPIERO po zlozeniu modelu - inaczej lapie golego klona bazy
+            RenderedIcons.Register(PrefabName);
         }
 
         private static void BuildVisual(GameObject prefab)
@@ -170,7 +180,7 @@ namespace VanilaMagic.Items
             wand.transform.localPosition = Vector3.zero;
             wand.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
             wand.AddComponent<MeshFilter>().sharedMesh = BuildShaftMesh();
-            wand.AddComponent<MeshRenderer>().sharedMaterial = silverMat;
+            wand.AddComponent<MeshRenderer>().sharedMaterial = BuildShaftMaterial(silverMat);
             // collidery sa niezbedne: bez nich item przelatuje przez podloge i nie da sie go podniesc
             var wandCollider = wand.AddComponent<BoxCollider>();
             wandCollider.size = new Vector3(0.14f, TipEnd + 0.02f, 0.14f);
@@ -286,6 +296,23 @@ namespace VanilaMagic.Items
 
             // razem: 24 + 48 + 384 + 12 = 468 trojkatow
             return mb.ToMesh("frostwand_shaft");
+        }
+
+        /// <summary>
+        /// "silverbar" to Standard bez albedo z Metallic=1 i Glossiness=0.82 - czysty metal, ktory
+        /// odbija wylacznie otoczenie i na cienkim, zaokraglonym trzonku wychodzi niemal czarny.
+        /// Bulawa srebrna (SilverHammer_mat) jest jasna, bo ma Metallic=0 i jasny albedo. Robimy
+        /// wlasny wariant w tym duchu: jasnoszary, lekko chlodny kolor bazowy i umiarkowany metal.
+        /// </summary>
+        private static Material BuildShaftMaterial(Material source)
+        {
+            var mat = new Material(source) { name = source.name + "_frostwand" };
+            // 0.86/0.9/0.96 przy Metallic 0.35 bylo za jasne (swiecilo jak plastik) - ciemniejszy
+            // szary i wiecej metalu, zeby zostal polysk, ale bez rozswietlonego diffuse'u
+            if (mat.HasProperty("_Color")) mat.SetColor("_Color", new Color(0.5f, 0.53f, 0.58f));
+            if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", 0.55f);
+            if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0.72f);
+            return mat;
         }
 
         private static Material FindModelMaterial(string prefabName, string meshName)

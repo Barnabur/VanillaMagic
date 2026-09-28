@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using BepInEx;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -19,12 +19,12 @@ namespace VanilaMagic
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    //[NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
+    [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class VanilaMagic : BaseUnityPlugin
     {
         public const string PluginGUID = "com.barnabur.vanilamagic";
         public const string PluginName = "VanilaMagic";
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "0.0.2";
         private GameObject BlueMushroomPrefab;
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -39,12 +39,12 @@ namespace VanilaMagic
             {
                 { "item_wandfireball", "Surtling Wand" },
                 { "item_staffheal", "Healing Staff" },
-                { "item_wandfireball_description", "Lulz Sword" },
+                { "item_wandfireball_description", "A bronze wand crowned with a surtling core that never stops smouldering. Spits a stream of embers that burst into flame on impact." },
                 { "item_wandfrost", "Frost Wand" },
                 { "item_wandfrost_description", "A crystal-tipped wand that hurls a bolt of biting cold. Bursts on impact." },
                 { "item_wandstone", "Stone Wand" },
                 { "item_wandstone_description", "A black metal claw gripping a shard of obsidian. Hurls a heavy rock that shatters on impact and knocks foes back." },
-                { "item_staffheal_description", "Lulz on a stick" },
+                { "item_staffheal_description", "Bone and ancient seeds bound together with ectoplasm. The greydwarves' stolen life seeps from it, mending the wounds of everyone who stands close." },
                 { "se_heal", "Healing" },
                 { "se_heal_desc", "Health per second:\n<color=#ff8000>{0}</color> <color=#ffff00>({1})</color>" },
                 { "item_bluemushroom", "Blue Mushroom" },
@@ -73,6 +73,44 @@ namespace VanilaMagic
                 { "se_wraithset_tooltip", "Bound in the wraith's chains, the dead lend you their craft." },
 
             });
+
+            Localization.AddTranslation("Polish", new Dictionary<string, string>
+            {
+                { "item_wandfireball", "Różdżka żaru" },
+                { "item_staffheal", "Kostur leczenia" },
+                { "item_wandfireball_description", "Brązowa różdżka zwieńczona rdzeniem pomiotu Surtra, który nigdy nie przestaje się tlić. Pluje strumieniem żaru, który przy uderzeniu wybucha płomieniem." },
+                { "item_wandfrost", "Różdżka mrozu" },
+                { "item_wandfrost_description", "Różdżka zakończona kryształem, która ciska pocisk przeszywającego zimna. Rozpryskuje się przy uderzeniu." },
+                { "item_wandstone", "Różdżka kamienia" },
+                { "item_wandstone_description", "Szpon z czarnego metalu ściskający odłamek obsydianu. Ciska ciężkim kamieniem, który roztrzaskuje się przy uderzeniu i odrzuca wrogów." },
+                { "item_staffheal_description", "Kości i starożytne nasiona spojone ektoplazmą. Skradzione Szarłom życie sączy się z niego, zasklepiając rany każdego, kto stoi w pobliżu." },
+                { "se_heal", "Leczenie" },
+                { "se_heal_desc", "Zdrowie na sekundę:\n<color=#ff8000>{0}</color> <color=#ffff00>({1})</color>" },
+                { "item_bluemushroom", "Niebieski grzyb" },
+                { "item_bluemushroom_description", "Dziwny grzyb pulsujący magiczną energią." },
+                { "item_wildberries", "Dzikie jagody" },
+                { "item_wildberries_description", "Świecące fioletowe jagody. Słodkie i brzęczące od eitru." },
+                { "item_ghostshake", "Upiorny koktajl" },
+                { "item_ghostshake_description", "Dzikie jagody ubite z ektoplazmą, aż całość zaczyna świecić. Zimny do samego dna, a mgiełka, którą zostawia, smakuje magią." },
+                { "item_crystalsugar", "Kryształowy cukier" },
+                { "item_crystalsugar_description", "Górski kryształ zmielony w żarnach na proch drobny jak szron. Nigdy się nie topi i nigdy do końca nie przestaje lśnić." },
+                { "item_eyescreamsprinkles", "Lody z oczu z posypką" },
+                { "item_eyescreamsprinkles_description", "Zamrożone oczy Szarłów pod warstwą kryształowego cukru. Posypka trzaska od eitru przy przełykaniu." },
+                { "item_sweetbread", "Słodka bułka" },
+                { "item_sweetbread_description", "Słodka bułka wyjęta z pieca bez lukru. Wystarczająco słodka sama w sobie." },
+                { "item_frostedsweetbread_uncooked", "Nieupieczona lukrowana słodka bułka" },
+                { "item_frostedsweetbread_uncooked_description", "Ciasto na słodką bułkę obtoczone w kryształowym cukrze. Lukier zastyga w piecu." },
+                { "item_wraithhood", "Kaptur upiora" },
+                { "item_wraithhood_description", "Kaptur wydarty z całunu upiora, spięty łańcuchem. Chłód nigdy go do końca nie opuszcza." },
+                { "item_wraithrobe", "Szata upiora" },
+                { "item_wraithrobe_description", "Postrzępione szaty spięte upiornym łańcuchem. Lekkie jak mgła i brzęczące od eitru." },
+                { "item_wraithlegs", "Nogawice upiora" },
+                { "item_wraithlegs_description", "Nogawice zszyte z całunu i łańcucha. Nie spowalniają noszącego." },
+                { "item_wraithcape", "Peleryna upiora" },
+                { "item_wraithcape_description", "Całunowa peleryna ciągnąca za sobą łańcuchy. Chroni przed górskim chłodem." },
+                { "se_wraithset", "Całun upiora" },
+                { "se_wraithset_tooltip", "Spętany łańcuchami upiora – umarli użyczają ci swojego kunsztu." },
+            });
         }
         private void Awake()
         {
@@ -88,6 +126,7 @@ namespace VanilaMagic
             // GhostShake po WildBerry - receptura bierze Wildberry jako skladnik
             Items.GhostShake.Register();
             Items.EctoplasmDrops.Register();
+            Items.FenringHairDrop.Register();
             Items.CrystalSugar.Register();
             Items.SugarFoods.Register();
             Items.HealingStaff.Register();
@@ -103,6 +142,7 @@ namespace VanilaMagic
             CommandManager.Instance.AddConsoleCommand(new MushroomOnlyCommand());
             CommandManager.Instance.AddConsoleCommand(new Items.DumpStaffCommand());
             CommandManager.Instance.AddConsoleCommand(new Items.WraithTintCommand());
+            CommandManager.Instance.AddConsoleCommand(new Items.WandIconCommand());
             // To learn more about Jotunn's features, go to
             // https://valheim-modding.github.io/Jotunn/tutorials/overview.html
         }

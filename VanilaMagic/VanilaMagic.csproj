@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -48,8 +48,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Wlasne ikony itemow - jedyne assety shipowane w DLL. Nazwa pliku = nazwa prefabu (VikingCupcake = podmiana ikony waniliowego itemu). -->
+    <!-- Wlasne ikony itemow (+ bundle vanilamagic ponizej) - jedyne assety shipowane w DLL. Nazwa pliku = nazwa prefabu (VikingCupcake = podmiana ikony waniliowego itemu). -->
     <EmbeddedResource Include="Assets\WildBerry.png" />
+    <EmbeddedResource Include="Assets\HealIcon.png" />
     <EmbeddedResource Include="Assets\Eyescream.png" />
     <EmbeddedResource Include="Assets\EyescreamSprinkles.png" />
     <EmbeddedResource Include="Assets\GhostShake.png" />
@@ -57,6 +58,11 @@
     <EmbeddedResource Include="Assets\Sweetbread.png" />
     <EmbeddedResource Include="Assets\FrostedSweetbreadUncooked.png" />
     <EmbeddedResource Include="Assets\VikingCupcake.png" />
+    <!-- Albedo peleryny Szat Widma w ukladzie UV siatki cape2 (kolory Fenrisa, Colorize w runtime). Zrodlo: scratch make_cape_tex.py -->
+    <EmbeddedResource Include="Assets\WraithCape.png" />
+    <EmbeddedResource Include="Assets\WraithCape_n.png" />
+    <!-- Bundle z wlasnymi meshami i albedo (budowany w VanilaMagicUnity: menu VanilaMagic > Build asset bundle). -->
+    <EmbeddedResource Include="Assets\vanilamagic" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -24,8 +24,8 @@ namespace VanilaMagic.Items
         public float m_topDrop = 0.12f;     // start: wierzcholki nie nizej niz tyle od najwyzszego z tylu
         public float m_backZ = -0.04f;      // tylko tyl peleryny: z (przestrzen postaci) ponizej tej wartosci
         public float m_spacing = 0.15f;     // odstep celow wzdluz peleryny (dlugosc segmentu w spoczynku)
-        public float m_surfaceOffset = 0.03f;
-        public float m_cuffRadius = 0.055f;
+        public float m_surfaceOffset = 0.04f;  // odsuniecie od materialu wzdluz normalnej tkaniny (fallback: od osi postaci)
+        public float m_cuffRadius = WraithArmor.CuffRadius;
         public float m_radialScale = 0.32f;
         public float m_meshLengthY = 0.96f; // dlugosc siatki ogniw (bounds.size.y) bez skali
         public float m_meshTopY = 0.49f;    // bounds.center.y + extents.y bez skali
@@ -35,6 +35,7 @@ namespace VanilaMagic.Items
         private Transform _character;
         private SkinnedMeshRenderer _renderer;
         private Mesh _baked;
+        private Vector3[] _worldNormals; // normalne zbakowanej siatki w swiecie (ostatni BakeWorld)
         private int[] _indices;
         private float _retryAt;
         private string _lastFail;
@@ -87,10 +88,17 @@ namespace VanilaMagic.Items
                     return;
                 }
                 var w = verts[idx];
-                // odsun od osi postaci (poziomo), zeby lancuch lezal na materiale, nie w nim
+                // odsun od materialu wzdluz normalnej tkaniny (skierowanej od osi postaci), zeby lancuch lezal
+                // NA plaszczu takze gdy wiatr / bieg odchyla go od ciala; bez normalnej - od osi postaci (poziomo)
                 var radial = w - _character.position;
                 radial -= up * Vector3.Dot(radial, up);
-                if (radial.sqrMagnitude > 1e-6f) w += radial.normalized * m_surfaceOffset;
+                var n = _worldNormals != null && idx < _worldNormals.Length ? _worldNormals[idx] : Vector3.zero;
+                if (n.sqrMagnitude > 1e-6f)
+                {
+                    if (Vector3.Dot(n, radial) < 0f) n = -n; // siatka dwustronna - normalna moze patrzec do srodka
+                    w += n.normalized * m_surfaceOffset;
+                }
+                else if (radial.sqrMagnitude > 1e-6f) w += radial.normalized * m_surfaceOffset;
                 pts[i] = w;
             }
             Place(pts);
@@ -100,7 +108,10 @@ namespace VanilaMagic.Items
         private Vector3[] BakeWorld()
         {
             if (!_renderer || !_renderer.sharedMesh) return null;
-            _renderer.BakeMesh(_baked, true);
+            // Skala szkieletu gracza to ~95-100 (siatki zbroi sa w 1/100 m). BakeMesh(useScale: true) dzieli przez te
+            // skale (wynik pasuje do TransformPoint), useScale: false zostawia metry - wtedy swiat = pos + rot * v.
+            // Sprawdzone w grze: (true, pos+rot*v) dawalo z -0.01..0 (100x za malo), (false, TransformPoint) 100x za duzo.
+            _renderer.BakeMesh(_baked, false);
             var local = _baked.vertices;
             if (local == null || local.Length == 0) return null;
             var t = _renderer.transform;
@@ -108,6 +119,13 @@ namespace VanilaMagic.Items
             var rot = t.rotation;
             var world = new Vector3[local.Length];
             for (var i = 0; i < local.Length; i++) world[i] = pos + rot * local[i];
+            var normals = _baked.normals;
+            if (normals != null && normals.Length == local.Length)
+            {
+                if (_worldNormals == null || _worldNormals.Length != local.Length) _worldNormals = new Vector3[local.Length];
+                for (var i = 0; i < local.Length; i++) _worldNormals[i] = (rot * normals[i]).normalized;
+            }
+            else _worldNormals = null;
             return world;
         }
 
@@ -134,13 +152,15 @@ namespace VanilaMagic.Items
             }
             var verts = BakeWorld();
             if (verts == null || verts.Length < 4) return Fail($"BakeMesh {_renderer.name} dal {(verts == null ? 0 : verts.Length)} wierzcholkow");
+            var spread = verts.Max(v => (v - _character.position).magnitude);
+            if (spread > 5f || spread < 0.2f) return Fail($"BakeMesh {_renderer.name}: wierzcholki w zlej skali (max odleglosc od postaci {spread:0.00} m, lossyScale renderera {_renderer.transform.lossyScale.x:0.0})");
 
             // wierzcholki w przestrzeni postaci
             var local = new Vector3[verts.Length];
             for (var i = 0; i < verts.Length; i++) local[i] = _character.InverseTransformPoint(verts[i]);
 
             var back = Enumerable.Range(0, local.Length).Where(i => local[i].z < m_backZ).ToList();
-            if (back.Count < 2) return Fail($"za malo wierzcholkow z tylu (z < {m_backZ}): {back.Count}; z w zakresie {local.Min(p => p.z):0.00}..{local.Max(p => p.z):0.00}");
+            if (back.Count < 2) return Fail($"za malo wierzcholkow z tylu (z < {m_backZ}): {back.Count}; x {local.Min(p => p.x):0.00}..{local.Max(p => p.x):0.00} y {local.Min(p => p.y):0.00}..{local.Max(p => p.y):0.00} z {local.Min(p => p.z):0.00}..{local.Max(p => p.z):0.00} (renderer {_renderer.name} lossyScale {_renderer.transform.lossyScale.x:0.0})");
 
             // start: u gory tylu peleryny, najblizej m_sideX
             var topY = back.Max(i => local[i].y);

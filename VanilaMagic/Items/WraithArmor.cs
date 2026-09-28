@@ -39,11 +39,15 @@ namespace VanilaMagic.Items
         public const string LegsName = "WraithLegs";
         public const string CapeName = "WraithCape";
         private const string SetName = "wraith";
+        private const int SetSize = 4; // kaptur, szata, nogawice, peleryna
         private const string SetEffectName = "SetEffect_WraithArmor";
 
         // Kolor futra: piksel -> luminancja * Gain * Tint (alfa bez zmian). Strojenie na zywo: `wraithtint`.
         public static Color Tint = new Color(0.30f, 0.38f, 0.65f);
         public static float Gain = 1.5f;
+        // Polysk calego setu = matowa peleryna (roughness od grafika ~0.99). Futro Fenrisa ma 0.06, cialo gracza 0.2
+        // (nakladka torsu/nog swiecila sie obok peleryny) - WraithMatteBody ustawia to samo na ciele.
+        public const float Gloss = 0.03f;
         public static Color CapeTint = Color.white; // mnoznik _Color na juz pokolorowanym kafelku peleryny
         public static Vector2 CapeTiling = new Vector2(5f, 3f); // kafelki na jednostke UV (u: 0.4 UV ~ 0.6 m, v: 1 UV ~ 0.8 m)
         public static float CapeTatterWidth = 0.05f;               // pas strzepow przy krawedzi (m); ogony peleryny maja ~0.2 m szerokosci, 0.12 wycinalo je cale
@@ -107,25 +111,39 @@ namespace VanilaMagic.Items
         private const float Armor = 8f;
         private const float ArmorPerLevel = 3f;
 
-        // lancuchy: grubosc (skala promieniowa siatki Chain) stala, dlugosci celowo rozne (asymetria):
-        // segmentow x skala dlugosci (siatka ma ~0.96 m) -> lewa reka ~0.29 m, prawa ~0.35 m, peleryna ~0.40 / ~0.31 m
-        private const float ChainRadialScale = 0.32f;
+        // Lancuchy 3D (rece; opcjonalnie peleryna): ogniwa proceduralne (DanglingChain.BuildLinkChainMesh) o wymiarach
+        // 1:1 z ogniwami namalowanymi na pelerynie (make_cape_tex.py CHAINS_C: skok 24 px, szerokosc 15 px, ~1.88 mm/px):
+        // ogniwo 5.6 x 2.8 cm, rurka 3 mm, skok 4.5 cm, kajdan R=3.1 cm. Segment verletu = kilka ogniw; dlugosci celowo rozne.
+        public const float ChainLinkLength = 0.056f;
+        public const float ChainLinkWidth = 0.028f;
+        public const float ChainTubeRadius = 0.006f;   // 2x grubsze niz malowane (Kamil: fizyczne lancuchy maja byc grubsze)
+        public const float ChainPitch = 0.045f;
+        public const float CuffRadius = 0.031f;
         private const int LeftHandSegments = 2;
-        private const float LeftHandLength = 0.15f;
+        private const int LeftHandLinksPerSegment = 3;   // 2 x 14.6 cm
         private const int RightHandSegments = 2;
-        private const float RightHandLength = 0.18f;
+        private const int RightHandLinksPerSegment = 4;  // 2 x 19.1 cm
         private const int CapeLeftSegments = 3;
-        private const float CapeLeftLength = 0.14f;
+        private const int CapeLeftLinksPerSegment = 3;
         private const int CapeRightSegments = 2;
-        private const float CapeRightLength = 0.16f;
+        private const int CapeRightLinksPerSegment = 3;
 
-        private static readonly List<(Texture source, Texture2D target)> RecoloredTextures = new List<(Texture, Texture2D)>();
+        private static readonly List<(Texture source, Texture2D target, Func<Color, Color> op)> RecoloredTextures = new List<(Texture, Texture2D, Func<Color, Color>)>();
+        private static Texture2D _cuffTex; // jednolity kolor kajdanow = Colorize(szary), odswiezany w Retint
+        private const float ChainGain = 1.7f; // tekstura ogniw Wraitha jest ciemna - podbicie, zeby zgrac z malowanymi lancuchami peleryny
         private static Material _furMat;
         private static Material _chestBodyMat;
         private static Material _legsBodyMat;
         private static Material _capeMat;
         private static Texture2D _capeAlbedo;      // skladane albedo w ukladzie UV (RGBA, alfa = strzepy)
-        private static Texture2D _customCapeAlbedo; // dev: PNG z dysku (uklad UV) zamiast kafelka
+        private static Texture2D _customCapeAlbedo; // dev: PNG z dysku (uklad UV cape2) zamiast zasobu
+        private static Texture2D _embeddedCapeAlbedo; // Assets/WraithCape.png (EmbeddedResource) - kolory Fenrisa, Colorize w runtime
+        private static Texture2D _embeddedCapeNormal; // Assets/WraithCape_n.png - normalna z albedo (zamiast pomarszczonej skory trolla)
+        private static Texture _trollCapeNormal;       // oryginalna troll_n do porownania (`wraithtint capemat _BumpMap troll`)
+        private static bool _embeddedCapeChecked;
+        public static bool CapeCustomRaw;               // PNG z dysku bez Colorize (gotowe kolory)
+        private const bool CapeEmbeddedRaw = false;     // WraithCape.png w DLL: baza grafika (ksztalt/alfa) sciemniona + lancuchy, kolory przez Colorize jak reszta setu
+        public static bool CapeChains3D;                // lancuchy ClothChain na pelerynie (domyslnie off: lancuchy sa namalowane w WraithCape.png)
         private static float[] _capeEdgeDistance;  // odleglosc od krawedzi siatki (m) per piksel, null = brak siatki
 
         public static void Register()
@@ -145,7 +163,7 @@ namespace VanilaMagic.Items
                 BuildHood(setEffect);
                 BuildRobe(setEffect, linkMesh, linkMat, cuffMat);
                 BuildLegs(setEffect);
-                BuildCape(linkMesh, linkMat, cuffMat);
+                BuildCape(setEffect, linkMesh, linkMat, cuffMat);
             }
             catch (Exception ex)
             {
@@ -172,6 +190,7 @@ namespace VanilaMagic.Items
 
             _furMat = new Material(furMat) { name = "WraithFur_mat" };
             _furMat.SetTexture("_MainTex", Recolor(furMat.GetTexture("_MainTex"), "wraithfur_d"));
+            _furMat.SetFloat("_Glossiness", Gloss);
 
             _chestBodyMat = new Material(chestBody) { name = "WraithFurChest_mat" };
             _chestBodyMat.SetTexture("_ChestTex", Recolor(chestBody.GetTexture("_ChestTex"), "wraithfur_chest_d"));
@@ -186,6 +205,15 @@ namespace VanilaMagic.Items
             BuildCapeEdgeDistance();
             RebuildCapeTextures();
             _capeMat.SetColor("_Color", CapeTint);
+            _trollCapeNormal = _capeMat.GetTexture("_BumpMap");
+            var normal = LoadEmbeddedPng("WraithCape_n", "wraithcape_n");
+            if (normal)
+            {
+                _embeddedCapeNormal = normal;
+                _capeMat.SetTexture("_BumpMap", normal);
+                Jotunn.Logger.LogInfo($"WraithArmor: normalna peleryny z WraithCape_n.png ({normal.width}x{normal.height}), _BumpScale={_capeMat.GetFloat("_BumpScale"):0.00}");
+            }
+            LogCapeMaterial();
         }
 
         /// <summary>
@@ -200,10 +228,16 @@ namespace VanilaMagic.Items
                                   $"wraith={(reference ? reference.shader.name : "null")} keywords=[{(reference ? string.Join(" ", reference.shaderKeywords) : "")}]");
             _capeMat.shaderKeywords = trollMat.shaderKeywords;
             _capeMat.EnableKeyword("_ALPHATEST_ON");
+            // Troll ma efekt deszczu (_ADDRAIN_ON: mokry polysk i "iskry" w deszczu), futro Fenrisa reszty setu nie -
+            // mokra peleryna blyszczala obok matowej szaty. Wylaczone jak w FenringArmor_mat.
+            _capeMat.DisableKeyword("_ADDRAIN_ON");
+            if (_capeMat.HasProperty("_AddRain")) _capeMat.SetFloat("_AddRain", 0f);
             _capeMat.SetFloat("_Cutoff", 0.5f);
             _capeMat.SetFloat("_Metallic", 0f);
-            _capeMat.SetFloat("_Glossiness", 0.2f);
+            // jak FenringArmor_mat: matowe futro (0.06, troll mial 0.2 - ciemna baza z polyskiem = czarny placek), relief pelny
+            _capeMat.SetFloat("_Glossiness", Gloss);
             _capeMat.SetFloat("_MetalGloss", 0f);
+            _capeMat.SetFloat("_BumpScale", 1f);
             _capeMat.renderQueue = 2450; // AlphaTest
             Jotunn.Logger.LogInfo($"WraithArmor: material peleryny keywords=[{string.Join(" ", _capeMat.shaderKeywords)}]");
         }
@@ -251,6 +285,28 @@ namespace VanilaMagic.Items
         private static void RebuildCapeTextures()
         {
             if (!_capeMat) return;
+            var ready = _customCapeAlbedo ? _customCapeAlbedo : EmbeddedCapeAlbedo();
+            if (ready)
+            {
+                // Gotowe albedo w ukladzie UV cape2 (u 0..0.4 = peleryna, v=1 kolnierz, alfa = strzepy):
+                // z dysku (`wraithtint capetex plik.png [raw]`) albo z zasobu DLL. Zasob ma kolory Fenrisa i przechodzi
+                // przez Colorize jak reszta setu, zeby `wraithtint r g b` tintowal cala zbroje spojnie.
+                var raw = _customCapeAlbedo ? CapeCustomRaw : CapeEmbeddedRaw;
+                if (!_capeAlbedo || _capeAlbedo.width != ready.width || _capeAlbedo.height != ready.height)
+                {
+                    if (_capeAlbedo) UnityEngine.Object.Destroy(_capeAlbedo);
+                    _capeAlbedo = new Texture2D(ready.width, ready.height, TextureFormat.RGBA32, true) { name = "wraithcape_d", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Point }; // jak FenringArmor_d - piksele splotu 1:1 z szata
+                }
+                var px = ready.GetPixels();
+                if (!raw) for (var i = 0; i < px.Length; i++) px[i] = Colorize(px[i]);
+                _capeAlbedo.SetPixels(px);
+                _capeAlbedo.Apply(true, false);
+                _capeMat.SetTexture("_MainTex", _capeAlbedo);
+                ResetCapeUv();
+                return;
+            }
+
+            // Fallback (brak zasobu): kafelek futra Fenrisa + proceduralne strzepy przy krawedziach siatki.
             var fur = _furMat ? _furMat.GetTexture("_MainTex") as Texture2D : null;
             var tile = fur ? BuildMirroredTile(fur, "wraithcape_tile_d") : null;
 
@@ -294,29 +350,226 @@ namespace VanilaMagic.Items
             _capeAlbedo.SetPixels(albedo);
             _capeAlbedo.Apply(true, false);
             _capeMat.SetTexture("_MainTex", _capeAlbedo);
-            _capeMat.SetTextureScale("_MainTex", Vector2.one);
+            ResetCapeUv();
             if (tile) UnityEngine.Object.Destroy(tile);
+        }
+
+        /// <summary>
+        /// Waniliowy material CapeTrollHide ma _MainTex_ST = (1, 1, -0.99, 0.38): troll_diffuse to wspoldzielony atlas
+        /// i peleryna czyta z niego przesuniety wycinek. Nasza tekstura jest w czystym ukladzie UV cape2, wiec skala 1
+        /// i offset 0 - inaczej (przy Clamp) cala peleryna dostaje jedna rozciagnieta kolumne pikseli.
+        /// </summary>
+        private static void ResetCapeUv()
+        {
+            foreach (var prop in new[] { "_MainTex", "_BumpMap" })
+            {
+                if (!_capeMat.HasProperty(prop)) continue;
+                _capeMat.SetTextureScale(prop, Vector2.one);
+                _capeMat.SetTextureOffset(prop, Vector2.zero);
+            }
+            SyncHoodedCape();
+        }
+
+        // Wariant peleryny noszonej z Kapturem Widma: gora (wiersze 0..HoodedCutRow z 128, od kolnierza) przezroczysta -
+        // lezy pod kolnierzem kaptura i w ruchu przebijala nad niego. Bez kaptura peleryna pelna. Podmiana materialu
+        // per postac w WraithHoodedCape (patch VisEquipment), bo _capeMat jest wspolny dla wszystkich graczy.
+        public static int HoodedCutRow = 25;          // dobrane w grze (2026-09-27, gora przypieta do kaptura); dev: `wraithtint capecut wiersz`
+        // Pas peleryny przypiety do kaptura (WraithCapeStrip_mesh z bundla: gorna czesc cape2 z wagami kolnierza kaptura,
+        // bez fizyki) - widoczne wiersze StripTopRow..StripBottomRow (+-2 px postrzepienia). Gora pod kolnierzem schowana,
+        // bo po odsunieciu pas wychodzil nad kolnierz. Dev: `wraithtint capestrip gora dol`.
+        public static int StripTopRow = 34;
+        public static int StripBottomRow = 46;
+        private static Material _capeMatStrip;
+        private static Texture2D _capeAlbedoStrip;
+        public static Material CapeMaterialStrip => _capeMatStrip;
+        private static Material _capeMatHooded;
+        private static Texture2D _capeAlbedoHooded;
+        public static Material CapeMaterial => _capeMat;
+        public static Material CapeMaterialHooded => _capeMatHooded;
+
+        /// <summary>Kopia materialu peleryny z albedo bez gornego pasa (ta sama tekstura, alfa 0 nad kolnierzem).</summary>
+        internal static void SyncHoodedCape()
+        {
+            if (!_capeMat || !_capeAlbedo) return;
+            if (!_capeMatHooded) _capeMatHooded = new Material(_capeMat) { name = "WraithCape_hooded_mat" };
+            else _capeMatHooded.CopyPropertiesFromMaterial(_capeMat);
+            _capeMatHooded.shaderKeywords = _capeMat.shaderKeywords;
+            _capeMatHooded.renderQueue = _capeMat.renderQueue;
+            int w = _capeAlbedo.width, h = _capeAlbedo.height;
+            if (!_capeAlbedoHooded || _capeAlbedoHooded.width != w || _capeAlbedoHooded.height != h)
+            {
+                if (_capeAlbedoHooded) UnityEngine.Object.Destroy(_capeAlbedoHooded);
+                _capeAlbedoHooded = new Texture2D(w, h, TextureFormat.RGBA32, true)
+                    { name = "wraithcape_hooded_d", wrapMode = _capeAlbedo.wrapMode, filterMode = _capeAlbedo.filterMode };
+            }
+            var px = _capeAlbedo.GetPixels();
+            var firstHidden = Mathf.RoundToInt(h * (1f - HoodedCutRow / 128f)); // Unity: y od dolu, kolnierz = v 1
+            for (var y = firstHidden; y < h; y++)
+                for (var x = 0; x < w; x++) px[y * w + x].a = 0f;
+            _capeAlbedoHooded.SetPixels(px);
+            _capeAlbedoHooded.Apply(true, false);
+            _capeMatHooded.SetTexture("_MainTex", _capeAlbedoHooded);
+
+            // pas: tylko wiersze StripTopRow..StripBottomRow, dol poszarpany (kolumny w pikselach 128)
+            if (!_capeMatStrip) _capeMatStrip = new Material(_capeMat) { name = "WraithCape_strip_mat" };
+            else _capeMatStrip.CopyPropertiesFromMaterial(_capeMat);
+            _capeMatStrip.shaderKeywords = _capeMat.shaderKeywords;
+            _capeMatStrip.renderQueue = _capeMat.renderQueue;
+            if (!_capeAlbedoStrip || _capeAlbedoStrip.width != w || _capeAlbedoStrip.height != h)
+            {
+                if (_capeAlbedoStrip) UnityEngine.Object.Destroy(_capeAlbedoStrip);
+                _capeAlbedoStrip = new Texture2D(w, h, TextureFormat.RGBA32, true)
+                    { name = "wraithcape_strip_d", wrapMode = _capeAlbedo.wrapMode, filterMode = _capeAlbedo.filterMode };
+            }
+            var sp = _capeAlbedo.GetPixels();
+            for (var y = 0; y < h; y++)
+            {
+                var row = (h - 1 - y) * 128f / h; // wiersz od kolnierza (0) w skali 128
+                for (var x = 0; x < w; x++)
+                {
+                    var col = (int)(x * 128f / w);
+                    var bottom = StripBottomRow + ((col * 7 + 3) % 5) - 2;
+                    if (row < StripTopRow || row > bottom + 1) sp[y * w + x].a = 0f;
+                }
+            }
+            _capeAlbedoStrip.SetPixels(sp);
+            _capeAlbedoStrip.Apply(true, false);
+            _capeMatStrip.SetTexture("_MainTex", _capeAlbedoStrip);
         }
 
         /// <summary>
         /// Dev: laduje PNG z dysku jako albedo peleryny (podglad tekstury malowanej w GIMP-ie bez Unity).
         /// Kafelkowanie zostaje z CapeTiling. Sciezka pusta lub "reset" przywraca kafelek z Fenrisa.
         /// </summary>
-        public static string LoadCapeAlbedo(string path)
+        public static string LoadCapeAlbedo(string path, bool raw = false)
         {
             if (!_capeMat) return "peleryna jeszcze nie zbudowana";
             if (string.IsNullOrEmpty(path) || path == "reset")
             {
                 _customCapeAlbedo = null;
+                CapeCustomRaw = false;
                 RebuildCapeTextures();
-                return "przywrocono kafelek z Fenrisa";
+                if (_embeddedCapeNormal) _capeMat.SetTexture("_BumpMap", _embeddedCapeNormal);
+                return _embeddedCapeAlbedo ? "przywrocono WraithCape.png z DLL" : "przywrocono kafelek z Fenrisa";
             }
             if (!System.IO.File.Exists(path)) return $"brak pliku: {path}";
             var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false) { name = "wraithcape_custom_d" };
             if (!LoadPng(tex, System.IO.File.ReadAllBytes(path))) return "nie udalo sie zdekodowac PNG";
-            _customCapeAlbedo = tex; // uklad UV peleryny (u 0..0.4, v 0..1); strzepy z alfy nakladane dalej
+            _customCapeAlbedo = tex; // uklad UV cape2 (u 0..0.4, v 0..1), alfa = strzepy - uzywane 1:1
+            CapeCustomRaw = raw;
             RebuildCapeTextures();
-            return $"zaladowano {tex.width}x{tex.height} z {path} (uklad UV, strzepy dolozone)";
+            // normalna obok pliku: <nazwa>_n.png (uklad UV) - jesli jest, podmieniamy razem z albedo
+            var normalPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(path) ?? "", System.IO.Path.GetFileNameWithoutExtension(path) + "_n.png");
+            var normalInfo = "";
+            if (System.IO.File.Exists(normalPath))
+            {
+                var ntex = new Texture2D(2, 2, TextureFormat.RGBA32, true, true) { name = "wraithcape_custom_n", wrapMode = TextureWrapMode.Clamp };
+                if (LoadPng(ntex, System.IO.File.ReadAllBytes(normalPath))) { _capeMat.SetTexture("_BumpMap", ntex); normalInfo = $" + normalna {System.IO.Path.GetFileName(normalPath)}"; }
+            }
+            else if (_embeddedCapeNormal) _capeMat.SetTexture("_BumpMap", _embeddedCapeNormal);
+            return $"zaladowano {tex.width}x{tex.height} z {path} ({(raw ? "kolory 1:1" : "przez Colorize/tint")}){normalInfo}";
+        }
+
+        /// <summary>Assets/WraithCape.png z DLL (uklad UV cape2, kolory Fenrisa). null = brak zasobu, wtedy fallback proceduralny.</summary>
+        private static Texture2D EmbeddedCapeAlbedo()
+        {
+            if (_embeddedCapeChecked) return _embeddedCapeAlbedo;
+            _embeddedCapeChecked = true;
+            _embeddedCapeAlbedo = LoadEmbeddedPng("WraithCape", "wraithcape_src");
+            if (_embeddedCapeAlbedo) Jotunn.Logger.LogInfo($"WraithArmor: albedo peleryny z WraithCape.png ({_embeddedCapeAlbedo.width}x{_embeddedCapeAlbedo.height})");
+            else Jotunn.Logger.LogWarning("WraithArmor: brak/zly zasob WraithCape.png - peleryna z kafelka Fenrisa");
+            return _embeddedCapeAlbedo;
+        }
+
+        /// <summary>PNG z EmbeddedResource Assets/&lt;name&gt;.png jako czytelna Texture2D (null = brak zasobu / zly plik).</summary>
+        private static Texture2D LoadEmbeddedPng(string name, string texName)
+        {
+            var resource = "VanilaMagic.Assets." + name + ".png";
+            using (var stream = typeof(WraithArmor).Assembly.GetManifestResourceStream(resource))
+            {
+                if (stream == null) return null;
+                var bytes = new byte[stream.Length];
+                stream.Read(bytes, 0, bytes.Length);
+                var tex = new Texture2D(2, 2, TextureFormat.RGBA32, true) { name = texName, wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Point };
+                return LoadPng(tex, bytes) ? tex : null;
+            }
+        }
+
+        /// <summary>Wypisuje do logu wszystkie wlasciwosci materialu peleryny (shader, keywordy, floaty, kolory, tekstury).</summary>
+        public static string LogCapeMaterial()
+        {
+            if (!_capeMat) return "peleryna jeszcze nie zbudowana";
+            var sb = new System.Text.StringBuilder();
+            sb.Append($"WraithCape_mat shader={_capeMat.shader.name} queue={_capeMat.renderQueue} keywords=[{string.Join(" ", _capeMat.shaderKeywords)}]");
+            var shader = _capeMat.shader;
+            var count = shader.GetPropertyCount();
+            for (var i = 0; i < count; i++)
+            {
+                var prop = shader.GetPropertyName(i);
+                switch (shader.GetPropertyType(i))
+                {
+                    case UnityEngine.Rendering.ShaderPropertyType.Float:
+                    case UnityEngine.Rendering.ShaderPropertyType.Range:
+                        sb.Append($"\n  {prop} = {_capeMat.GetFloat(prop):0.###}");
+                        break;
+                    case UnityEngine.Rendering.ShaderPropertyType.Color:
+                        sb.Append($"\n  {prop} = {_capeMat.GetColor(prop)}");
+                        break;
+                    case UnityEngine.Rendering.ShaderPropertyType.Vector:
+                        sb.Append($"\n  {prop} = {_capeMat.GetVector(prop)}");
+                        break;
+                    case UnityEngine.Rendering.ShaderPropertyType.Texture:
+                        var t = _capeMat.GetTexture(prop);
+                        sb.Append($"\n  {prop} = {(t ? t.name + " " + t.width + "x" + t.height : "null")}");
+                        break;
+                }
+            }
+            var text = sb.ToString();
+            Jotunn.Logger.LogInfo("WraithArmor: " + text);
+            return text;
+        }
+
+        /// <summary>
+        /// Dev: ustawia wlasciwosc materialu peleryny na zywo. Wartosci: 1 liczba = float; 3-4 liczby = kolor;
+        /// dla tekstur: "none" (null), "troll" (oryginalna normalna trolla), "own" (nasza z zasobu);
+        /// "on"/"off" = keyword shadera. Zwraca komunikat do konsoli.
+        /// </summary>
+        public static string SetCapeMaterial(string prop, string[] values)
+        {
+            if (!_capeMat) return "peleryna jeszcze nie zbudowana";
+            if (values.Length == 1 && (values[0] == "on" || values[0] == "off"))
+            {
+                if (values[0] == "on") _capeMat.EnableKeyword(prop); else _capeMat.DisableKeyword(prop);
+                return $"keyword {prop} {values[0]} -> [{string.Join(" ", _capeMat.shaderKeywords)}]";
+            }
+            if (values.Length == 1 && (values[0] == "none" || values[0] == "troll" || values[0] == "own"))
+            {
+                Texture tex = values[0] == "none" ? null : values[0] == "troll" ? _trollCapeNormal : (Texture)_embeddedCapeNormal;
+                _capeMat.SetTexture(prop, tex);
+                return $"{prop} = {(tex ? tex.name : "null")}";
+            }
+            var nums = new List<float>();
+            foreach (var v in values)
+            {
+                if (!float.TryParse(v, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var f)) return $"zla wartosc: {v}";
+                nums.Add(f);
+            }
+            if (!_capeMat.HasProperty(prop)) return $"material nie ma wlasciwosci {prop}";
+            if (nums.Count == 4 && prop.EndsWith("_ST"))
+            {
+                var texProp = prop.Substring(0, prop.Length - 3);
+                _capeMat.SetTextureScale(texProp, new Vector2(nums[0], nums[1]));
+                _capeMat.SetTextureOffset(texProp, new Vector2(nums[2], nums[3]));
+                return $"{texProp} scale=({nums[0]},{nums[1]}) offset=({nums[2]},{nums[3]})";
+            }
+            if (nums.Count == 1) { _capeMat.SetFloat(prop, nums[0]); return $"{prop} = {nums[0]}"; }
+            if (nums.Count >= 3)
+            {
+                var c = new Color(nums[0], nums[1], nums[2], nums.Count > 3 ? nums[3] : 1f);
+                _capeMat.SetColor(prop, c);
+                return $"{prop} = {c}";
+            }
+            return "uzycie: wraithtint capemat <wlasciwosc> <float | r g b [a] | none|troll|own | on|off>";
         }
 
         /// <summary>ImageConversion.LoadImage przez refleksje (bezposrednia referencja nie kompiluje sie pod net48, patrz WildBerry).</summary>
@@ -381,43 +634,71 @@ namespace VanilaMagic.Items
         private static Material BuildCuffMaterial(Material linkMat)
         {
             var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false) { name = "wraith_cuff_d" };
-            var gray = new Color(0.32f, 0.33f, 0.37f, 1f);
-            tex.SetPixels(new[] { gray, gray, gray, gray });
-            tex.Apply(false, true);
+            var cc = CuffColor();
+            tex.SetPixels(new[] { cc, cc, cc, cc });
+            tex.Apply(false, false);
+            _cuffTex = tex;
             var mat = new Material(linkMat) { name = "WraithCuff_mat" };
             mat.SetTexture("_MainTex", tex);
             mat.SetTexture("_BumpMap", null);
             mat.SetTexture("_MetallicGlossMap", null);
-            mat.SetFloat("_Metallic", 1f);
-            mat.SetFloat("_Glossiness", 0.45f);
-            mat.SetFloat("_MetalGloss", 0.45f);
+            mat.DisableKeyword("_METALLICGLOSSMAP");
+            mat.SetFloat("_Metallic", 0.5f);
+            mat.SetFloat("_Glossiness", 0.5f);
+            mat.SetFloat("_MetalGloss", 0.5f);
             mat.SetColor("_Color", Color.white);
             return mat;
         }
 
-        private static Texture2D Recolor(Texture source, string name)
+        private static Texture2D Recolor(Texture source, string name, Func<Color, Color> op = null)
         {
             if (!source)
             {
                 Jotunn.Logger.LogWarning($"WraithArmor: brak tekstury zrodlowej dla {name}");
                 return null;
             }
+            op = op ?? Colorize;
             var target = CopyReadable(source, name);
-            ApplyPixelOp(target, Colorize);
-            RecoloredTextures.Add((source, target));
+            ApplyPixelOp(target, op);
+            RecoloredTextures.Add((source, target, op));
             return target;
         }
+
+        /// <summary>Ogniwa lancuchow (rece, opcjonalnie peleryna): kopia materialu "wraith" z albedo przez Colorize + ChainGain.</summary>
+        private static Material BuildChainLinkMaterial(Material linkMat)
+        {
+            if (!linkMat) return null;
+            var mat = new Material(linkMat) { name = "WraithChain_mat" };
+            var albedo = Recolor(linkMat.GetTexture("_MainTex"), "wraithchain_d", ColorizeChain);
+            if (albedo) mat.SetTexture("_MainTex", albedo);
+            return mat;
+        }
+
+        private static Color ColorizeChain(Color c)
+        {
+            var lum = (0.299f * c.r + 0.587f * c.g + 0.114f * c.b) * Gain * ChainGain;
+            return new Color(Mathf.Clamp01(Tint.r * lum), Mathf.Clamp01(Tint.g * lum), Mathf.Clamp01(Tint.b * lum), c.a);
+        }
+
+        /// <summary>Kolor kajdanow: srednioszary metal przez Colorize (ten sam odcien co ogniwa i malowane lancuchy).</summary>
+        private static Color CuffColor() => Colorize(new Color(0.62f, 0.62f, 0.62f, 1f)); // ~srodek jasnosci malowanych ogniw
 
         /// <summary>Przemalowuje ponownie wszystkie tekstury setu (po zmianie parametrow tintu).</summary>
         public static void Retint()
         {
-            foreach (var (source, target) in RecoloredTextures)
+            foreach (var (source, target, op) in RecoloredTextures)
             {
                 var tmp = CopyReadable(source, "tmp");
-                ApplyPixelOp(tmp, Colorize);
+                ApplyPixelOp(tmp, op);
                 target.SetPixels(tmp.GetPixels());
                 target.Apply(true, false);
                 UnityEngine.Object.Destroy(tmp);
+            }
+            if (_cuffTex)
+            {
+                var cc = CuffColor();
+                _cuffTex.SetPixels(new[] { cc, cc, cc, cc });
+                _cuffTex.Apply(false, false);
             }
             if (_capeMat)
             {
@@ -522,7 +803,7 @@ namespace VanilaMagic.Items
             se.m_skillLevelModifier = 10f;
             se.m_skillLevel2 = Skills.SkillType.BloodMagic;
             se.m_skillLevelModifier2 = 10f;
-            var hood = PrefabManager.Instance.GetPrefab("HelmetFenring");
+            var hood = PrefabManager.Instance.GetPrefab("HelmetFenring"); // tymczasowo; BuildHood podmienia na ikone Kaptura Widma
             if (hood) se.m_icon = hood.GetComponent<ItemDrop>().m_itemData.m_shared.m_icons.FirstOrDefault();
             ItemManager.Instance.AddStatusEffect(new CustomStatusEffect(se, false));
             return se;
@@ -534,32 +815,68 @@ namespace VanilaMagic.Items
         {
             var item = BuildPiece(HoodName, "HelmetFenring", "item_wraithhood", Colorize, new Dictionary<string, int[]>
             {
-                //                         L1 L2 L3 L4   (Bagno, Bagno, Gory, Rowniny)
-                { "TrophyWraith", new[] { 1, 0, 0, 0 } },
-                { "Chain",        new[] { 2, 2, 0, 0 } },
-                { "WolfHairBundle", new[] { 20, 0, 0, 0 } }, // siersc Fenrisa, tyle co w recepturze Fenrisa
-                { "Iron",         new[] { 0, 3, 0, 0 } },
-                { "Silver",       new[] { 0, 0, 4, 0 } },
-                { "Crystal",      new[] { 0, 0, 2, 0 } },
-                { "BlackMetal",   new[] { 0, 0, 0, 3 } },
-                { "LinenThread",  new[] { 0, 0, 0, 6 } },
+                // koszty 1:1 z HelmetFenring: skora wilka -> ektoplazma, trofeum kultysty -> trofeum upiora
+                //                           L1  L2  L3  L4
+                { "TrophyWraith",   new[] {  1,  0,  0,  0 } },
+                { "WolfHairBundle", new[] { 20,  5, 10, 15 } },
+                { "Ectoplasm",      new[] {  2,  4,  8, 12 } },
             });
             var shared = item.ItemDrop.m_itemData.m_shared;
             ApplyArmorStats(shared, 1f, 0.1f, setEffect);
+            // ikona efektu setu = przemalowana ikona Kaptura Widma (BuildSetEffect idzie przed kapturem i bral waniliowego Fenrisa)
+            var hoodIcon = shared.m_icons.FirstOrDefault();
+            if (setEffect && hoodIcon) setEffect.m_icon = hoodIcon;
             ReplaceMaterials(item.ItemPrefab, "FenringArmor_mat", _furMat);
+
+            // Kolnierz kaptura odsuniety na zewnatrz peleryny (2-6 cm, liczone w ripie: CapeLab.PushHoodOverCape),
+            // zeby peleryna wychodzila spod niego, a nie przykrywala go. Ta sama topologia, bindposes i wagi co FenringHood.
+            var hoodMesh = ModAssets.Load<Mesh>("WraithHood_mesh");
+            SkinnedMeshRenderer hoodSmr = null;
+            foreach (var smr in item.ItemPrefab.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                if (!smr.sharedMesh || smr.sharedMesh.name != "FenringHood") continue;
+                hoodSmr = smr;
+                if (hoodMesh && smr.sharedMesh.vertexCount == hoodMesh.vertexCount) smr.sharedMesh = hoodMesh;
+            }
+
+            // Gorny pas Peleryny Widma jako czesc kaptura: bez fizyki, wagi kolnierza, wiec w biegu nie wychodzi nad kolnierz
+            // (peleryna pod kapturem ukryta do HoodedCutRow). AttachItem daje kosci ciala wszystkim SMR pod attach_skin.
+            // Widoczny tylko z Peleryna Widma - przelacza WraithHoodedCape.
+            // WYLACZONE (2026-09-27): osobny pas odjezdzal od peleryny ("dwie czesci") - zamiast tego sama peleryna ma gore
+            // przypieta do kaptura (WraithCapeCloth.PinTopToHood). Kod zostaje na wypadek powrotu.
+            var stripMesh = UseCapeStrip ? ModAssets.Load<Mesh>("WraithCapeStrip_mesh") : null;
+            if (UseCapeStrip && hoodSmr && stripMesh && _capeMatStrip)
+            {
+                var strip = new GameObject(CapeStripName);
+                strip.transform.SetParent(hoodSmr.transform.parent, false);
+                strip.transform.localPosition = hoodSmr.transform.localPosition;
+                strip.transform.localRotation = hoodSmr.transform.localRotation;
+                strip.transform.localScale = hoodSmr.transform.localScale;
+                var stripSmr = strip.AddComponent<SkinnedMeshRenderer>();
+                stripSmr.sharedMesh = stripMesh;
+                stripSmr.sharedMaterial = _capeMatStrip;
+                stripSmr.bones = hoodSmr.bones;
+                stripSmr.rootBone = hoodSmr.rootBone;
+                stripSmr.updateWhenOffscreen = hoodSmr.updateWhenOffscreen;
+                stripSmr.enabled = false;
+                Jotunn.Logger.LogInfo($"WraithArmor: pas peleryny w kapturze ({stripMesh.vertexCount} wierzch.)");
+            }
+            else if (UseCapeStrip) Jotunn.Logger.LogWarning($"WraithArmor: brak pasa peleryny w kapturze (hood={(bool)hoodSmr} mesh={(bool)stripMesh} mat={(bool)_capeMatStrip})");
         }
+
+        public const string CapeStripName = "WraithCapeStrip";
+        private static readonly bool UseCapeStrip = false;
 
         private static void BuildRobe(StatusEffect setEffect, Mesh linkMesh, Material linkMat, Material cuffMat)
         {
             var item = BuildPiece(RobeName, "ArmorFenringChest", "item_wraithrobe", Colorize, new Dictionary<string, int[]>
             {
-                { "Chain",        new[] { 5, 3, 0, 0 } },
-                { "Iron",         new[] { 4, 6, 0, 0 } },
-                { "WolfHairBundle", new[] { 20, 0, 0, 0 } }, // siersc Fenrisa, tyle co w recepturze Fenrisa
-                { "Silver",       new[] { 0, 0, 8, 0 } },
-                { "Crystal",      new[] { 0, 0, 3, 0 } },
-                { "BlackMetal",   new[] { 0, 0, 0, 6 } },
-                { "LinenThread",  new[] { 0, 0, 0, 10 } },
+                // koszty 1:1 z ArmorFenringChest (skora wilka -> ektoplazma) + lancuchy na kajdany
+                //                           L1  L2  L3  L4
+                { "WolfHairBundle", new[] { 20,  5, 10, 15 } },
+                { "Ectoplasm",      new[] {  5,  3,  6,  9 } },
+                { "LeatherScraps",  new[] { 10,  4,  8, 12 } },
+                { "Chain",          new[] {  5,  3,  3,  3 } },
             });
             var shared = item.ItemDrop.m_itemData.m_shared;
             ApplyArmorStats(shared, 5f, 0.2f, setEffect);
@@ -567,21 +884,19 @@ namespace VanilaMagic.Items
             shared.m_armorMaterial = _chestBodyMat;
 
             // lancuchy z kajdanami z nadgarstkow (kosci LeftHand / RightHand)
-            AttachChain(item.ItemPrefab, "attach_LeftHand", linkMesh, linkMat, cuffMat, LeftHandSegments, LeftHandLength);
-            AttachChain(item.ItemPrefab, "attach_RightHand", linkMesh, linkMat, cuffMat, RightHandSegments, RightHandLength);
+            AttachChain(item.ItemPrefab, "attach_LeftHand", cuffMat, LeftHandSegments, LeftHandLinksPerSegment);
+            AttachChain(item.ItemPrefab, "attach_RightHand", cuffMat, RightHandSegments, RightHandLinksPerSegment);
         }
 
         private static void BuildLegs(StatusEffect setEffect)
         {
             var item = BuildPiece(LegsName, "ArmorFenringLegs", "item_wraithlegs", Colorize, new Dictionary<string, int[]>
             {
-                { "Chain",        new[] { 3, 2, 0, 0 } },
-                { "Iron",         new[] { 3, 5, 0, 0 } },
-                { "WolfHairBundle", new[] { 20, 0, 0, 0 } }, // siersc Fenrisa, tyle co w recepturze Fenrisa
-                { "Silver",       new[] { 0, 0, 6, 0 } },
-                { "Crystal",      new[] { 0, 0, 2, 0 } },
-                { "BlackMetal",   new[] { 0, 0, 0, 5 } },
-                { "LinenThread",  new[] { 0, 0, 0, 8 } },
+                // koszty 1:1 z ArmorFenringLegs (skora wilka -> ektoplazma)
+                //                           L1  L2  L3  L4
+                { "WolfHairBundle", new[] { 20,  5, 10, 15 } },
+                { "Ectoplasm",      new[] {  5,  3,  6,  9 } },
+                { "LeatherScraps",  new[] { 10,  4,  8, 12 } },
             });
             var shared = item.ItemDrop.m_itemData.m_shared;
             ApplyArmorStats(shared, 5f, 0.2f, setEffect);
@@ -589,16 +904,17 @@ namespace VanilaMagic.Items
             shared.m_armorMaterial = _legsBodyMat;
         }
 
-        private static void BuildCape(Mesh linkMesh, Material linkMat, Material cuffMat)
+        private static void BuildCape(StatusEffect setEffect, Mesh linkMesh, Material linkMat, Material cuffMat)
         {
             var item = BuildPiece(CapeName, "CapeTrollHide", "item_wraithcape", Colorize, new Dictionary<string, int[]>
             {
-                //                         L1 L2 L3 L4   (Gory, Gory, Rowniny, Rowniny)
-                { "Chain",        new[] { 4, 0, 0, 0 } },
-                { "Silver",       new[] { 6, 6, 0, 0 } },
-                { "Crystal",      new[] { 2, 3, 0, 0 } },
-                { "BlackMetal",   new[] { 0, 0, 4, 6 } },
-                { "LinenThread",  new[] { 0, 0, 8, 10 } },
+                // wzor CapeWolf (skora wilka 6 +4/poz., srebro 4 +2/poz., trofeum wilka):
+                // skora -> siersc Fenrisa, srebro -> ektoplazma, trofeum -> trofeum upiora, + lancuchy
+                //                           L1  L2  L3  L4
+                { "WolfHairBundle", new[] {  6,  4,  8, 12 } },
+                { "Ectoplasm",      new[] {  4,  2,  4,  6 } },
+                { "TrophyWraith",   new[] {  1,  0,  0,  0 } },
+                { "Chain",          new[] {  2,  2,  2,  2 } },
             });
             var shared = item.ItemDrop.m_itemData.m_shared;
             shared.m_armor = 1f;
@@ -606,28 +922,58 @@ namespace VanilaMagic.Items
             shared.m_maxQuality = 4;
             shared.m_weight = 4f;
             shared.m_eitrRegenModifier = 0.1f;
-            // baza nalezy do setu trolla - odpinamy, zeby peleryna nie liczyla sie do SetEffect_TrollArmor
-            shared.m_setName = string.Empty;
-            shared.m_setSize = 0;
-            shared.m_setStatusEffect = null;
+            // baza nalezy do setu trolla - przepinamy na set Szat Widma (4. czesc), zeby nie liczyla sie do SetEffect_TrollArmor
+            shared.m_setName = SetName;
+            shared.m_setSize = SetSize;
+            shared.m_setStatusEffect = setEffect;
             shared.m_damageModifiers = new List<HitData.DamageModPair>
             {
                 new HitData.DamageModPair { m_type = HitData.DamageType.Frost, m_modifier = HitData.DamageModifier.Resistant },
             };
             ReplaceMaterials(item.ItemPrefab, "CapeTrollHide", _capeMat);
+            WraithCapeCloth.ApplyToPrefab(item.ItemPrefab); // blizej ciala niz troll (promien czastek 0.085 -> 0.03)
+            WraithCapeCloth.PinTopToHood(item.ItemPrefab);  // gora bez fizyki, z wagami kolnierza kaptura
 
             // dwa lancuchy "naszyte" na pelerynie (ClothChain): sledza wierzcholki tkaniny cape2 (troll)
             // w kolumnach x = -0.12 / +0.12 (przestrzen postaci), wiec zawsze leza na plaszczu.
             // Wczesniejsze podejscia (stala sila do tylu, kapsula tulowia, pochylona kapsula) przegrywaly
             // z symulacja tkaniny - lancuchy ladowaly pod spodem. Root "attach_Spine2" tylko po to,
             // zeby AttachArmor zainstancjonowal i aktywowal obiekt razem z peleryna.
-            var root = new GameObject("attach_Spine2");
+            // Domyslnie WYLACZONE (CapeChains3D=false): lancuchy sa namalowane w WraithCape.png (jak pasy na CapeDeepNorthMage),
+            // bo ogniwa przyklejone do 96 wierzcholkow tkaniny skakaly miedzy nimi. `wraithtint capechains on` wlacza je na zywo.
+            var root = new GameObject(CapeChains3D ? "attach_Spine2" : "chains3d_off");
             root.transform.SetParent(item.ItemPrefab.transform, false);
             root.SetActive(false);
-            ClothChain.Build("chain_left", linkMesh, linkMat, CapeLeftSegments, ChainRadialScale, CapeLeftLength * 0.96f, -0.12f, cuffMat)
+            var capeLeftMesh = DanglingChain.BuildLinkChainMesh(CapeLeftLinksPerSegment, ChainLinkLength, ChainLinkWidth, ChainTubeRadius, ChainPitch);
+            var capeRightMesh = DanglingChain.BuildLinkChainMesh(CapeRightLinksPerSegment, ChainLinkLength, ChainLinkWidth, ChainTubeRadius, ChainPitch);
+            ClothChain.Build("chain_left", capeLeftMesh, cuffMat, CapeLeftSegments, 1f, capeLeftMesh.bounds.size.y, -0.12f, cuffMat)
                 .transform.SetParent(root.transform, false);
-            ClothChain.Build("chain_right", linkMesh, linkMat, CapeRightSegments, ChainRadialScale, CapeRightLength * 0.96f, 0.12f, cuffMat)
+            ClothChain.Build("chain_right", capeRightMesh, cuffMat, CapeRightSegments, 1f, capeRightMesh.bounds.size.y, 0.12f, cuffMat)
                 .transform.SetParent(root.transform, false);
+            _capeChainsRoot = root;
+        }
+
+        private static GameObject _capeChainsRoot;
+
+        /// <summary>
+        /// Dev: wlacza/wylacza lancuchy 3D na pelerynie. Na prefabie zmienia nazwe roota (AttachArmor instancjonuje tylko
+        /// dzieci "attach_*"), na zalozonych juz pelerynach gasi/zapala instancje ClothChain w scenie. Nowe zalozenie peleryny
+        /// (zdjac/zalozyc) bierze stan z prefabu.
+        /// </summary>
+        public static string SetCapeChains3D(bool on)
+        {
+            CapeChains3D = on;
+            if (_capeChainsRoot) _capeChainsRoot.name = on ? "attach_Spine2" : "chains3d_off";
+            var live = 0;
+            foreach (var chain in UnityEngine.Object.FindObjectsOfType<ClothChain>(true))
+            {
+                if (chain.transform.parent && chain.transform.parent.gameObject.scene.IsValid())
+                {
+                    chain.transform.parent.gameObject.SetActive(on);
+                    live++;
+                }
+            }
+            return $"lancuchy 3D na pelerynie: {(on ? "wlaczone" : "wylaczone")} (prefab), {live} instancji w scenie {(on ? "zapalonych" : "zgaszonych")}; zdejmij i zaloz peleryne, zeby odswiezyc";
         }
 
         private static CustomItem BuildPiece(string prefabName, string baseName, string token, Func<Color, Color> iconOp, Dictionary<string, int[]> perLevel)
@@ -665,7 +1011,7 @@ namespace VanilaMagic.Items
             shared.m_movementModifier = 0f; // Fenris ma +0.03 - to jego bonus, nie nasz
             shared.m_eitrRegenModifier = eitrRegen;
             shared.m_setName = SetName;
-            shared.m_setSize = 3;
+            shared.m_setSize = SetSize;
             shared.m_setStatusEffect = setEffect;
         }
 
@@ -695,11 +1041,10 @@ namespace VanilaMagic.Items
             }
         }
 
-        private static void AttachChain(GameObject prefab, string attachName, Mesh linkMesh, Material linkMat, Material cuffMat,
-            int segments, float lengthScale)
+        private static void AttachChain(GameObject prefab, string attachName, Material cuffMat, int segments, int linksPerSegment)
         {
-            var chain = DanglingChain.Build(attachName, linkMesh, linkMat, segments, ChainRadialScale, lengthScale,
-                Vector3.zero, Vector3.zero, cuffMat);
+            var mesh = DanglingChain.BuildLinkChainMesh(linksPerSegment, ChainLinkLength, ChainLinkWidth, ChainTubeRadius, ChainPitch);
+            var chain = DanglingChain.Build(attachName, mesh, cuffMat, segments, 1f, 1f, Vector3.zero, Vector3.zero, cuffMat);
             chain.transform.SetParent(prefab.transform, false);
             // jak waniliowe attach_skin: nieaktywne w prefabie, AttachArmor aktywuje instancje
             chain.SetActive(false);

@@ -56,11 +56,13 @@ namespace VanilaMagic.Items
                     Icons = new[] { seedShared.m_icons[0] },
                     CraftingStation = "forge",
                     RepairStation = "forge",
-                    MinStationLevel = 4,
+                    // jak waniliowa bron z zelaza: kuznia 2, q4 przy kuzni 5
+                    MinStationLevel = 2,
                     Requirements = new[]
                     {
-                        new RequirementConfig("Bronze", 7, 2),
-                        new RequirementConfig("SurtlingCore", 1, 1),
+                        new RequirementConfig("BoneFragments", 10, 5),
+                        new RequirementConfig("AncientSeed", 2, 1),
+                        new RequirementConfig("Ectoplasm", 5, 3),
                     },
                 };
 
@@ -94,6 +96,8 @@ namespace VanilaMagic.Items
                 shared.m_trailStartEffect = MakeEffectList("sfx_bomb_throw");
 
                 BuildVisual(item.ItemPrefab);
+                // Render ikony DOPIERO po zlozeniu modelu - inaczej lapie golego klona bazy
+                RenderedIcons.Register(PrefabName);
             }
             catch (Exception ex)
             {
@@ -111,16 +115,15 @@ namespace VanilaMagic.Items
             // m_healthPerTick ustawia Heal_SE.SetLevel przy nalozeniu (quality + skill);
             // pola m_healthOverTime* pominiete - dzialaja tylko przy m_healthOverTime > 0
 
-            // ikona: item Wildberry (rejestrowany wczesniej w Awake), awaryjnie waniliowa malina
-            var iconSource = PrefabManager.Instance.GetPrefab("Wildberry");
-            if (!iconSource) iconSource = PrefabManager.Instance.GetPrefab("Raspberry");
-            if (iconSource)
+            // ikona: zielone serce (Assets/HealIcon.png - serce z waniliowego sprite'a "Healthy"
+            // bez ramki, przemalowane offline; sprite'a nie laduje zaden prefab, wiec nie da sie
+            // go wziac w runtime), awaryjnie waniliowa malina
+            healEffect.m_icon = RuntimeTextures.LoadIcon("HealIcon");
+            if (!healEffect.m_icon)
             {
-                healEffect.m_icon = iconSource.GetComponent<ItemDrop>().m_itemData.m_shared.m_icons.FirstOrDefault();
-            }
-            else
-            {
-                Jotunn.Logger.LogWarning("HealingStaff: brak zrodla ikony dla status effectu");
+                var raspberry = PrefabManager.Instance.GetPrefab("Raspberry");
+                if (raspberry) healEffect.m_icon = raspberry.GetComponent<ItemDrop>().m_itemData.m_shared.m_icons.FirstOrDefault();
+                else Jotunn.Logger.LogWarning("HealingStaff: brak zrodla ikony dla status effectu");
             }
             return new CustomStatusEffect(healEffect, false);
         }

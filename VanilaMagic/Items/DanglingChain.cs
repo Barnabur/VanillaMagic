@@ -16,7 +16,7 @@ namespace VanilaMagic.Items
     {
         public float m_segmentLength = 0.17f;
         public float m_segmentTop = 0.08f; // odleglosc od pivota segmentu do jego gornego konca (wzdluz +Y)
-        public float m_cuffRadius = 0.05f;
+        public float m_cuffRadius = WraithArmor.CuffRadius;
         public float m_gravity = 14f;      // wiecej niz 9.81 = "ciezki" metal: szybciej opada i sie uspokaja
         public float m_damping = 0.96f; // bezwladnosc w biegu zostaje, ale bez lekkiego "fruwania"
         public float m_maxSpeed = 12f; // m/s - tylko ochrona przed biczowaniem przy bardzo szybkich animacjach
@@ -197,7 +197,7 @@ namespace VanilaMagic.Items
                 AddMesh(seg, linkMesh, linkMaterial);
             }
 
-            var cuffRadius = 0.055f;
+            var cuffRadius = WraithArmor.CuffRadius;
             if (cuffMaterial)
             {
                 var cuff = new GameObject("cuff");
@@ -227,8 +227,35 @@ namespace VanilaMagic.Items
 
         private static Mesh _cuffMesh;
 
-        /// <summary>Wspolna siatka kajdana (promien 0.055 m) - uzywana tez przez ClothChain.</summary>
-        public static Mesh CuffMesh => _cuffMesh ? _cuffMesh : BuildCuffMesh(0.055f, 0.012f);
+        /// <summary>Wspolna siatka kajdana - promien i grubosc jak kajdan namalowany na pelerynie (WraithCape.png).</summary>
+        public static Mesh CuffMesh => _cuffMesh ? _cuffMesh : BuildCuffMesh(WraithArmor.CuffRadius, WraithArmor.ChainTubeRadius);
+
+        /// <summary>
+        /// Proceduralny odcinek lancucha: `links` owalnych ogniw wzdluz osi Y (srodek odcinka w 0), naprzemiennie
+        /// w plaszczyznach XY i ZY, o wymiarach 1:1 z ogniwami namalowanymi na pelerynie. Siatka w metrach -
+        /// DanglingChain.Build / ClothChain.Build wolac ze skala 1. UV z TubeBuilder nie pasuja do atlasu,
+        /// wiec material = jednolity kolor (WraithCuff_mat).
+        /// </summary>
+        public static Mesh BuildLinkChainMesh(int links, float linkLength, float linkWidth, float tubeRadius, float pitch)
+        {
+            var mb = new TubeBuilder();
+            var total = (links - 1) * pitch + linkLength;
+            var a = linkLength * 0.5f - tubeRadius; // polos wzdluz lancucha (os rurki)
+            var b = linkWidth * 0.5f - tubeRadius;  // polos poprzeczna
+            for (var i = 0; i < links; i++)
+            {
+                var cy = -total * 0.5f + linkLength * 0.5f + i * pitch;
+                var flat = i % 2 == 0;
+                mb.AddTube(t =>
+                {
+                    var ang = t * 2f * Mathf.PI;
+                    var y = cy + Mathf.Sin(ang) * a;
+                    var w = Mathf.Cos(ang) * b;
+                    return flat ? new Vector3(w, y, 0f) : new Vector3(0f, y, w);
+                }, t => tubeRadius, 28, 8);
+            }
+            return mb.ToMesh($"wraith_chain_{links}");
+        }
 
         /// <summary>Kajdan = torus w plaszczyznie XY (os Z), zeby po obrocie segmentu wisial pionowo w linii lancucha.</summary>
         private static Mesh BuildCuffMesh(float ringRadius, float tubeRadius)
