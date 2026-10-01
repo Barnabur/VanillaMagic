@@ -29,8 +29,8 @@ Setup:
 
 | Configuration | Result |
 |---|---|
-| **Debug** | DLL copied to `BepInEx/plugins/VanilaMagic/`. Developer console commands are registered (`wandicon`, `wraithtint`, `dumpstaff`, `mushroomroom`, `whichroom`, `nearspawns`, `blinkspawn`, `mushroomonly`). |
-| **Release** | Thunderstore package `VanilaMagic/bin/Release/net48/VanilaMagic.zip`, built from `VanilaMagic/Package` (manifest, icon) and `VanilaMagic/README.md`. No developer commands. |
+| **Debug** | DLL copied to `BepInEx/plugins/VanillaMagic/`. Developer console commands are registered (`wandicon`, `wraithtint`, `dumpstaff`, `mushroomroom`, `whichroom`, `nearspawns`, `blinkspawn`, `mushroomonly`). |
+| **Release** | Thunderstore package `VanilaMagic/bin/Release/net48/VanillaMagic.zip`, built from `VanilaMagic/Package` (manifest, icon) and `VanilaMagic/README.md`. No developer commands. |
 
 Diagnostic logging uses `LogDebug`. To see it, set `LogLevels = All` in `BepInEx/config/BepInEx.cfg`.
 

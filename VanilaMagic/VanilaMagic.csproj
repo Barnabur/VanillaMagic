@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <TargetFramework>net48</TargetFramework>
     <RootNamespace>VanilaMagic</RootNamespace>
-    <AssemblyName>VanilaMagic</AssemblyName>
+    <AssemblyName>VanillaMagic</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <LangVersion>10</LangVersion>

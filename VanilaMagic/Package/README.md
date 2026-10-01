@@ -64,7 +64,7 @@ Install with **r2modman** or **Thunderstore Mod Manager**. BepInEx and Jötunn a
 
 1. Install [BepInExPack Valheim](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/).
 2. Install [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/).
-3. Copy `VanilaMagic.dll` into `BepInEx/plugins/VanilaMagic/`.
+3. Copy `VanillaMagic.dll` into `BepInEx/plugins/VanillaMagic/`.
 
 ### Multiplayer
 
@@ -82,6 +82,9 @@ Install with **r2modman** or **Thunderstore Mod Manager**. BepInEx and Jötunn a
 - **Balance pass**: further tuning of wand damage and eitr costs, Wraith armor stats and drop rates, based on playtesting and feedback.
 
 ## Changelog
+
+### 0.0.4
+- Plugin file renamed to `VanillaMagic.dll` to match the mod name. Mod managers handle this automatically. If you installed manually, delete the old `BepInEx/plugins/VanilaMagic` folder.
 
 ### 0.0.3
 - Mod name corrected to **VanillaMagic**.
