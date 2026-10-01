@@ -93,3 +93,8 @@ Install with **r2modman** or **Thunderstore Mod Manager**. BepInEx and Jötunn a
 - Balance is still being tuned. Feedback is very welcome.
 
 Source code and bug reports: https://github.com/Barnabarz/VanilaMagic
+
+## License
+
+Code and original artwork: MIT, (c) 2026 Barnabur. See [LICENSE](https://github.com/Barnabarz/VanilaMagic/blob/main/LICENSE).
+Valheim and its assets are (c) Iron Gate AB. Files derived from game assets are not covered by the license.

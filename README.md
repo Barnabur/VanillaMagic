@@ -45,6 +45,11 @@ Diagnostic logging uses `LogDebug`. To see it, set `LogLevels = All` in `BepInEx
 | `tools/` | Offline helper scripts (prefab dump, glTF export). |
 | `art/` | Source art (wand renders, mod icon). |
 
+## License
+
+Code and original artwork: MIT, (c) 2026 Barnabur. See [LICENSE](LICENSE).
+Valheim and its assets are (c) Iron Gate AB. Files derived from game assets are not covered by the license.
+
 ## Credits
 
 Based on [JotunnModStub](https://github.com/Valheim-Modding/JotunnModStub) by the Valheim Modding Community.
