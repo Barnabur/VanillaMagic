@@ -117,6 +117,8 @@ namespace VanilaMagic
             // Jotunn comes with its own Logger class to provide a consistent Log style for all mods using it
             Jotunn.Logger.LogInfo("VanillaMagic has landed");
             AddLocalizations();
+            // config przed rejestracja - dropy czytaja z niego wartosci
+            ModConfig.Bind(Config);
             // Bundle wylaczony: rozdzki i krzak sa w calosci kodowe (kitbash z waniliowych assetow).
             // WildBerry przed HealingStaff - status effect leczenia bierze ikone z itemu Wildberry.
             Items.SurtlingWand.Register();

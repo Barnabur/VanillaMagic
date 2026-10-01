@@ -54,6 +54,8 @@ These make the ingredients reachable in their own biome:
 - **Wraiths** (Swamp, at night) always drop 1 **Ectoplasm**. **Ghosts** now drop it only 10% of the time.
 - **Fenrings** have a 25% chance to drop a **Wolf Hair Bundle**.
 
+The Ghost and Fenring drops can be changed in the [config](#configuration).
+
 ## Installation
 
 ### With a mod manager (recommended)
@@ -70,6 +72,19 @@ Install with **r2modman** or **Thunderstore Mod Manager**. BepInEx and Jötunn a
 
 **Everyone must have the mod**, including the server, with the same minor version. Jötunn checks this when you connect.
 
+## Configuration
+
+Settings are in `BepInEx/config/com.barnabur.vanilamagic.cfg`, created on first launch. You can also edit them in game with [Configuration Manager](https://thunderstore.io/c/valheim/p/Azumatt/Official_BepInEx_ConfigurationManager/) (F1).
+
+| Setting | Default | Description |
+|---|---|---|
+| `Drops.FenringHairChance` | 25 | Chance (%) that a Fenring drops a Wolf Hair Bundle |
+| `Drops.FenringHairAmount` | 1 | How many Wolf Hair Bundles a Fenring drops |
+| `Drops.GhostEctoplasmChance` | 10 | Chance (%) that a Ghost drops Ectoplasm (vanilla: 100) |
+| `Drops.GhostEctoplasmAmount` | 1 | How much Ectoplasm a Ghost drops (vanilla: 1-5) |
+
+On a server, the server's values are synced to all players. Changes apply to creatures that spawn after the change.
+
 ## Compatibility
 
 - Wands, armor and foods are new items. Vanilla items are only touched where listed above (Viking Cupcake stats, the oven conversion, Ectoplasm/Fenring drops, the unused blue mushroom).
@@ -78,12 +93,13 @@ Install with **r2modman** or **Thunderstore Mod Manager**. BepInEx and Jötunn a
 
 ## Planned
 
-- **Config file**: let players and server admins tune the mod without editing code (drop chances, damage, eitr costs, recipes).
+- **More config options**: damage, eitr costs, recipes and the remaining drops (the first drop settings arrived in 0.0.4).
 - **Balance pass**: further tuning of wand damage and eitr costs, Wraith armor stats and drop rates, based on playtesting and feedback.
 
 ## Changelog
 
 ### 0.0.4
+- New config file with server sync: Fenring Wolf Hair Bundle drop and Ghost Ectoplasm drop (chance and amount).
 - Plugin file renamed to `VanillaMagic.dll` to match the mod name. Mod managers handle this automatically. If you installed manually, delete the old `BepInEx/plugins/VanilaMagic` folder.
 
 ### 0.0.3

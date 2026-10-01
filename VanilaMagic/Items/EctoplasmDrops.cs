@@ -19,13 +19,12 @@ namespace VanilaMagic.Items
         // Wraith: zawsze dokladnie 1 szt. (bez mnoznika za gwiazdki)
         private const int WraithAmount = 1;
 
-        // Ghost: waniliowo 1-5 na 100%, zostaje 1 szt. z 10% szansa
-        private const int GhostAmount = 1;
-        private const float GhostChance = 0.1f;
+        // Ghost: waniliowo 1-5 na 100%; szansa i ilosc z configu (domyslnie 1 szt. z 10% szansa)
 
         public static void Register()
         {
             PrefabManager.OnVanillaPrefabsAvailable += Apply;
+            ModConfig.DropsChanged += Apply;
         }
 
         private static void Apply()
@@ -33,7 +32,8 @@ namespace VanilaMagic.Items
             var ectoplasm = PrefabManager.Instance.GetPrefab(EctoplasmName);
             if (!ectoplasm)
             {
-                Jotunn.Logger.LogWarning($"EctoplasmDrops: brak waniliowego prefabu {EctoplasmName}");
+                // przy zmianie configu w menu glownym prefaby moga jeszcze nie istniec - nalozy sie przy wejsciu do swiata
+                Jotunn.Logger.LogDebug($"EctoplasmDrops: brak waniliowego prefabu {EctoplasmName}");
                 return;
             }
 
@@ -51,10 +51,11 @@ namespace VanilaMagic.Items
                 return;
             }
 
-            drop.m_amountMin = GhostAmount;
-            drop.m_amountMax = GhostAmount;
-            drop.m_chance = GhostChance;
-            Jotunn.Logger.LogDebug($"EctoplasmDrops: Ghost dropi {GhostAmount} ektoplazmy z szansa {GhostChance:P0}");
+            var amount = ModConfig.GhostEctoplasmAmount.Value;
+            drop.m_amountMin = amount;
+            drop.m_amountMax = amount;
+            drop.m_chance = ModConfig.GhostEctoplasmChance.Value / 100f;
+            Jotunn.Logger.LogDebug($"EctoplasmDrops: Ghost dropi {amount} ektoplazmy z szansa {drop.m_chance:P0}");
         }
 
         private static void AddToWraith(GameObject ectoplasm)
