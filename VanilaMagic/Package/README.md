@@ -1,8 +1,8 @@
-# VanilaMagic
+# VanillaMagic
 
 **Vanilla-friendly early-game magic for Valheim.**
 
-In vanilla, magic only becomes available in the Mistlands. VanilaMagic adds a small set of
+In vanilla, magic only becomes available in the Mistlands. VanillaMagic adds a small set of
 basic magic tools that you can use from the **Black Forest through the Plains**, so a mage
 playthrough can start much earlier.
 
@@ -79,6 +79,7 @@ Install with **r2modman** or **Thunderstore Mod Manager**. BepInEx and Jötunn a
 ## Changelog
 
 ### 0.0.3
+- Mod name corrected to **VanillaMagic**.
 - Surtling Wand renamed to **Flame Wand** and rebalanced: 20 blunt + 20 fire damage (was 22 + 15), 7 eitr per attack (was 10).
 - Flame Wand now fires where you aim (its fireballs used to drop well below the crosshair).
 - All wands and the Healing Staff: 100 durability, +25 per upgrade level.

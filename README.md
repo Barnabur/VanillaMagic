@@ -1,8 +1,8 @@
-# VanilaMagic
+# VanillaMagic
 
 **Vanilla-friendly early-game magic for Valheim.**
 
-VanilaMagic adds a small set of basic, not overpowered magic tools you can use from the
+VanillaMagic adds a small set of basic, not overpowered magic tools you can use from the
 **Black Forest through the Plains**: four wands and staves, early eitr foods, and a wraith
 mage armor set. Everything is built at runtime from the game's own models, materials and
 effects, so it looks and feels like vanilla Valheim.

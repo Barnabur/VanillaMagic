@@ -23,7 +23,7 @@ namespace VanilaMagic
     internal class VanilaMagic : BaseUnityPlugin
     {
         public const string PluginGUID = "com.barnabur.vanilamagic";
-        public const string PluginName = "VanilaMagic";
+        public const string PluginName = "VanillaMagic";
         public const string PluginVersion = "0.0.3";
         private GameObject BlueMushroomPrefab;
         // Use this class to add your own localization to the game
@@ -115,7 +115,7 @@ namespace VanilaMagic
         private void Awake()
         {
             // Jotunn comes with its own Logger class to provide a consistent Log style for all mods using it
-            Jotunn.Logger.LogInfo("VanilaMagic has landed");
+            Jotunn.Logger.LogInfo("VanillaMagic has landed");
             AddLocalizations();
             // Bundle wylaczony: rozdzki i krzak sa w calosci kodowe (kitbash z waniliowych assetow).
             // WildBerry przed HealingStaff - status effect leczenia bierze ikone z itemu Wildberry.
