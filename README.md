@@ -9,6 +9,7 @@ effects, so it looks and feels like vanilla Valheim.
 
 - **Mod page, features and changelog:** [VanilaMagic/README.md](VanilaMagic/README.md). This is the same text that appears on Thunderstore.
 - **Download:** Thunderstore (install with r2modman or Thunderstore Mod Manager).
+- **Configuration:** `BepInEx/config/com.barnabur.vanilamagic.cfg`, synced from the server to all players. The Ghost Ectoplasm and Fenring Wolf Hair Bundle drops (chance and amount) can be changed there. All settings are listed in [VanilaMagic/README.md](VanilaMagic/README.md#configuration).
 
 ## Building from source
 
@@ -38,7 +39,7 @@ Diagnostic logging uses `LogDebug`. To see it, set `LogLevels = All` in `BepInEx
 
 | Path | Contents |
 |---|---|
-| `VanilaMagic/` | The plugin. `Items/` holds the wands, foods and armor, `DungeonRooms/` the Frost Cave mushroom rooms (see its README), `StatusEffects/` the status effects. |
+| `VanilaMagic/` | The plugin. `ModConfig.cs` holds the config entries, `Items/` the wands, foods and armor, `DungeonRooms/` the Frost Cave mushroom rooms (see its README), `StatusEffects/` the status effects. |
 | `VanilaMagic/Package/` | Thunderstore manifest and icon. |
 | `VanilaMagic/Assets/` | Embedded resources: item icons, cape textures and the `vanilamagic` asset bundle. |
 | `VanilaMagicUnity/` | Unity 6 (6000.0.75f1) stub project used to build the asset bundle. |
