@@ -2,7 +2,7 @@
   "name": "VanilaMagic",
   "description": "Vanilla-friendly early-game magic: wands, a healing staff, eitr foods and a wraith mage set, from the Black Forest to the Plains.",
   "version_number": "0.0.3",
-  "website_url": "https://github.com/Barnabarz/VanilaMagic",
+  "website_url": "https://github.com/Barnabur/VanilaMagic",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333",
     "ValheimModding-Jotunn-2.30.2"
