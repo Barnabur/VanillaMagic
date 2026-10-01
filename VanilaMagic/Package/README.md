@@ -76,6 +76,11 @@ Install with **r2modman** or **Thunderstore Mod Manager**. BepInEx and Jötunn a
 - Frost Caves get variants of their rooms with mushroom spots. Only newly generated caves have mushrooms, so explore new areas or use a new world.
 - Mods that heavily rework the same drops or the Viking Cupcake may override each other's changes.
 
+## Planned
+
+- **Config file**: let players and server admins tune the mod without editing code (drop chances, damage, eitr costs, recipes).
+- **Balance pass**: further tuning of wand damage and eitr costs, Wraith armor stats and drop rates, based on playtesting and feedback.
+
 ## Changelog
 
 ### 0.0.3
