@@ -51,7 +51,7 @@ namespace VanilaMagic.Items
                     applied++;
                 }
             }
-            Jotunn.Logger.LogInfo($"LeveledRequirements: podpiete {applied} wymagan dla {Pending.Count} itemow");
+            Jotunn.Logger.LogDebug($"LeveledRequirements: podpiete {applied} wymagan dla {Pending.Count} itemow");
         }
 
         [HarmonyPatch(typeof(Piece.Requirement), nameof(Piece.Requirement.GetAmount))]

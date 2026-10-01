@@ -8,7 +8,7 @@ namespace VanilaMagic.Items
     /// Przenosi zrodlo ektoplazmy na bagna, zeby GhostShake dalo sie zrobic w swoim biomie.
     /// Waniliowo ektoplazma leci wylacznie z Ghosta (1-5 szt., 100%), a Ghost nie ma wpisu
     /// w spawnerach biomow - siedzi w dungeonach i eventach. Upior (Wraith) lata po bagnach
-    /// noca, wiec to on dostaje ektoplazme, a Ghostowi tniemy ilosc.
+    /// noca, wiec to on dostaje ektoplazme (zawsze 1 szt.), a Ghost dropi ja juz tylko z 10% szansa.
     /// Nie odpinamy sie od eventu (waniliowe prefaby moga byc przeladowane miedzy sesjami);
     /// obie operacje sa idempotentne - wpis Upiora dokladamy tylko, gdy go jeszcze nie ma.
     /// </summary>
@@ -16,13 +16,12 @@ namespace VanilaMagic.Items
     {
         public const string EctoplasmName = "Ectoplasm";
 
-        // Wraith: tyle samo co waniliowy Chain (m_levelMultiplier -> gwiazdki daja wiecej)
-        private const int WraithAmountMin = 1;
-        private const int WraithAmountMax = 2;
+        // Wraith: zawsze dokladnie 1 szt. (bez mnoznika za gwiazdki)
+        private const int WraithAmount = 1;
 
-        // Ghost: waniliowo 1-5, zostaje 1-2 przy niezmienionej szansie
-        private const int GhostAmountMin = 1;
-        private const int GhostAmountMax = 2;
+        // Ghost: waniliowo 1-5 na 100%, zostaje 1 szt. z 10% szansa
+        private const int GhostAmount = 1;
+        private const float GhostChance = 0.1f;
 
         public static void Register()
         {
@@ -52,9 +51,10 @@ namespace VanilaMagic.Items
                 return;
             }
 
-            drop.m_amountMin = GhostAmountMin;
-            drop.m_amountMax = GhostAmountMax;
-            Jotunn.Logger.LogInfo($"EctoplasmDrops: Ghost dropi {GhostAmountMin}-{GhostAmountMax} ektoplazmy");
+            drop.m_amountMin = GhostAmount;
+            drop.m_amountMax = GhostAmount;
+            drop.m_chance = GhostChance;
+            Jotunn.Logger.LogDebug($"EctoplasmDrops: Ghost dropi {GhostAmount} ektoplazmy z szansa {GhostChance:P0}");
         }
 
         private static void AddToWraith(GameObject ectoplasm)
@@ -66,12 +66,12 @@ namespace VanilaMagic.Items
             drops.m_drops.Add(new CharacterDrop.Drop
             {
                 m_prefab = ectoplasm,
-                m_amountMin = WraithAmountMin,
-                m_amountMax = WraithAmountMax,
+                m_amountMin = WraithAmount,
+                m_amountMax = WraithAmount,
                 m_chance = 1f,
-                m_levelMultiplier = true,
+                m_levelMultiplier = false,
             });
-            Jotunn.Logger.LogInfo($"EctoplasmDrops: Wraith dropi {WraithAmountMin}-{WraithAmountMax} ektoplazmy");
+            Jotunn.Logger.LogDebug($"EctoplasmDrops: Wraith dropi zawsze {WraithAmount} ektoplazmy");
         }
 
         private static CharacterDrop GetDrops(string creature)

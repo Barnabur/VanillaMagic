@@ -40,7 +40,7 @@ namespace VanilaMagic.Items
                 m_chance = Chance,
                 m_levelMultiplier = false,
             });
-            Jotunn.Logger.LogInfo($"FenringHairDrop: {CreatureName} dropi 1 {HairName} z szansa {Chance:P0}");
+            Jotunn.Logger.LogDebug($"FenringHairDrop: {CreatureName} dropi 1 {HairName} z szansa {Chance:P0}");
         }
     }
 }

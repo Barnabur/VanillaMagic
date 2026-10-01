@@ -171,7 +171,7 @@ namespace VanilaMagic.DungeonRooms
                 // Uwaga: m_theme to flagi - część pokoi jest współdzielona z jaskinią Hildir (Cave|CaveHildir)
                 foreach (var r in DungeonDB.instance.m_rooms.Where(r => (r.m_theme & Room.Theme.Cave) != 0))
                 {
-                    Jotunn.Logger.LogInfo($"Cave room: {r.m_prefab.Name} (theme: {r.m_theme})");
+                    Jotunn.Logger.LogDebug($"Cave room: {r.m_prefab.Name} (theme: {r.m_theme})");
                 }
 
                 EnsureInZNetScene(mushroomPrefab);
@@ -198,7 +198,7 @@ namespace VanilaMagic.DungeonRooms
                 ZNetScene.instance.m_prefabs.Add(prefab);
                 ZNetScene.instance.m_namedPrefabs.Add(hash, prefab);
                 PrefabManager.Instance.AddPrefab(new CustomPrefab(prefab, false));
-                Jotunn.Logger.LogInfo($"Zarejestrowano {prefab.name} w ZNetScene");
+                Jotunn.Logger.LogDebug($"Zarejestrowano {prefab.name} w ZNetScene");
             }
         }
 
@@ -222,7 +222,7 @@ namespace VanilaMagic.DungeonRooms
 
             if (disabled > 0)
             {
-                Jotunn.Logger.LogInfo($"Wyłączono {disabled} oryginalnych pokoi zastąpionych wariantami z grzybkami");
+                Jotunn.Logger.LogDebug($"Wyłączono {disabled} oryginalnych pokoi zastąpionych wariantami z grzybkami");
             }
         }
 
@@ -276,7 +276,7 @@ namespace VanilaMagic.DungeonRooms
                 customRoom.RoomData.m_theme = vanillaData.m_theme;
             }
 
-            Jotunn.Logger.LogInfo($"Dodano wariant pokoju {roomName} z grzybkami (theme: {vanillaData.m_theme})");
+            Jotunn.Logger.LogDebug($"Dodano wariant pokoju {roomName} z grzybkami (theme: {vanillaData.m_theme})");
         }
 
         private static void AttachToParent(GameObject mushroom, string parentName, GameObject roomClone, string roomName)

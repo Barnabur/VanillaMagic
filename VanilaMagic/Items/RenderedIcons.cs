@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using Jotunn.Managers;
 using UnityEngine;
 
@@ -70,6 +72,48 @@ namespace VanilaMagic.Items
             return Render(prefabName);
         }
 
+        /// <summary>
+        /// Renderuje ikone tym samym kadrem co w grze, ale w podanym rozmiarze, i zapisuje jako PNG
+        /// (przezroczyste tlo) - material do grafik poza gra, np. ikony moda na Thunderstore.
+        /// </summary>
+        public static string Export(string prefabName, int size, string directory)
+        {
+            var prefab = PrefabManager.Instance.GetPrefab(prefabName);
+            if (!prefab || !Shots.TryGetValue(prefabName, out var shot)) return null;
+
+            var sprite = RenderSprite(prefab, shot, size);
+            if (!sprite) return null;
+
+            var encode = Type.GetType("UnityEngine.ImageConversion, UnityEngine.ImageConversionModule")
+                ?.GetMethod("EncodeToPNG", new[] { typeof(Texture2D) });
+            if (encode == null)
+            {
+                Jotunn.Logger.LogWarning("RenderedIcons: brak ImageConversion.EncodeToPNG w runtime");
+                return null;
+            }
+
+            var png = (byte[])encode.Invoke(null, new object[] { sprite.texture });
+            Directory.CreateDirectory(directory);
+            var path = Path.Combine(directory, $"{prefabName}_{size}.png");
+            File.WriteAllBytes(path, png);
+            return path;
+        }
+
+        private static Sprite RenderSprite(GameObject prefab, Shot shot, int size)
+        {
+            var request = new RenderManager.RenderRequest(prefab)
+            {
+                Width = size,
+                Height = size,
+                Rotation = Quaternion.Euler(shot.Euler),
+                FieldOfView = shot.FieldOfView,
+                DistanceMultiplier = shot.Distance,
+                // Bez cache - inaczej strojenie komenda wandicon oddawaloby stary render
+                UseCache = false,
+            };
+            return RenderManager.Instance.Render(request);
+        }
+
         private static bool Render(string prefabName)
         {
             var prefab = PrefabManager.Instance.GetPrefab(prefabName);
@@ -81,18 +125,7 @@ namespace VanilaMagic.Items
             }
 
             var shot = Shots[prefabName];
-            var request = new RenderManager.RenderRequest(prefab)
-            {
-                Width = Size,
-                Height = Size,
-                Rotation = Quaternion.Euler(shot.Euler),
-                FieldOfView = shot.FieldOfView,
-                DistanceMultiplier = shot.Distance,
-                // Bez cache - inaczej strojenie komenda wandicon oddawaloby stary render
-                UseCache = false,
-            };
-
-            var sprite = RenderManager.Instance.Render(request);
+            var sprite = RenderSprite(prefab, shot, Size);
             if (!sprite)
             {
                 Jotunn.Logger.LogWarning($"RenderedIcons: render {prefabName} nie wyszedl - zostaje ikona bazowa z ItemConfig");
@@ -101,7 +134,7 @@ namespace VanilaMagic.Items
 
             sprite.name = prefabName + "_rendered";
             drop.m_itemData.m_shared.m_icons = new[] { sprite };
-            Jotunn.Logger.LogInfo($"RenderedIcons: {prefabName} ikona z modelu, kadr {shot.Euler} fov={shot.FieldOfView} dist={shot.Distance}");
+            Jotunn.Logger.LogDebug($"RenderedIcons: {prefabName} ikona z modelu, kadr {shot.Euler} fov={shot.FieldOfView} dist={shot.Distance}");
             return true;
         }
     }

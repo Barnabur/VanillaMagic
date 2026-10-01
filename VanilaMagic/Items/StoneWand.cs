@@ -103,7 +103,7 @@ namespace VanilaMagic.Items
             {
                 Jotunn.Logger.LogWarning("StoneWand: brak vfx_stonegolem_attack_hit/sfx_troll_rock_destroyed - zostaje efekt trolla");
             }
-            Jotunn.Logger.LogInfo(
+            Jotunn.Logger.LogDebug(
                 $"StoneWand: pocisk - hitEffects=" +
                 string.Join(",", proj.m_hitEffects?.m_effectPrefabs?.Select(e => e.m_prefab ? e.m_prefab.name : "null") ?? new string[0]) +
                 $", rayRadius={proj.m_rayRadius}, glaz={(rock ? rock.localScale.x.ToString("0.###") : "brak")}");
@@ -139,6 +139,9 @@ namespace VanilaMagic.Items
             ItemManager.Instance.AddItem(item);
 
             var shared = item.ItemDrop.m_itemData.m_shared;
+            // wytrzymalosc wspolna dla wszystkich rozdzek: 100 +25 na poziom
+            shared.m_maxDurability = 100f;
+            shared.m_durabilityPerLevel = 25f;
             // StaffFireball ma blunt 120 + fire 120 (+6 fire/lvl) - zerujemy i dajemy czysty blunt
             shared.m_damages = new HitData.DamageTypes { m_blunt = BluntDamage };
             shared.m_damagesPerLevel = new HitData.DamageTypes { m_blunt = BluntDamagePerLevel };
@@ -155,7 +158,7 @@ namespace VanilaMagic.Items
             // glaz jest ciezki - strzelamy ~5 stopni wyzej niz fireball (vanilla launchAngle -5,
             // w Valheim ujemna wartosc = wyzej), zeby lot mial wyrazniejszy luk
             attack.m_launchAngle -= 5f;
-            Jotunn.Logger.LogInfo($"StoneWand: launchAngle={attack.m_launchAngle}, vel={attack.m_projectileVel}");
+            Jotunn.Logger.LogDebug($"StoneWand: launchAngle={attack.m_launchAngle}, vel={attack.m_projectileVel}");
 
             // dzwiek wystrzalu: cichy, obnizony thump trolla zamiast ognistego "whoosh";
             // alternatywy: sfx_stonegolem_primary_start (zgrzyt skaly), sfx_greydwarf_throw (lekki rzut kamieniem)
@@ -203,7 +206,7 @@ namespace VanilaMagic.Items
             if (shake) UnityEngine.Object.DestroyImmediate(shake, true);
 
             PrefabManager.Instance.AddPrefab(new CustomPrefab(sfx, false));
-            Jotunn.Logger.LogInfo($"StoneWand: {CastSfxName} <- {CastSfxSource}, vol={CastSfxVolume}, pitch={CastSfxMinPitch}-{CastSfxMaxPitch}, delay={CastSfxDelay}s, " +
+            Jotunn.Logger.LogDebug($"StoneWand: {CastSfxName} <- {CastSfxSource}, vol={CastSfxVolume}, pitch={CastSfxMinPitch}-{CastSfxMaxPitch}, delay={CastSfxDelay}s, " +
                 $"klipy={string.Join(",", zsfx.m_audioClips.Select(c => c ? c.name : "null"))}");
             return sfx;
         }
@@ -296,7 +299,7 @@ namespace VanilaMagic.Items
             stoneRoot.transform.localScale = scale;
             stoneRoot.transform.localRotation = Quaternion.Euler(0f, 0f, 30f);
             stoneRoot.transform.localPosition = new Vector3(0f, 0f, StoneCenter);
-            Jotunn.Logger.LogInfo(
+            Jotunn.Logger.LogDebug(
                 $"StoneWand: obsydian mesh={(stoneMesh ? stoneMesh.name : "null")} pca={usedPca} osie long={axisLong} thin={axisThin} " +
                 $"srodek={frameCenter} -> wymiary vanilla (long,mid,thin)={extents}, skala={scale}");
         }
@@ -435,7 +438,7 @@ namespace VanilaMagic.Items
             if (mat.HasProperty("_MetallicGlossMap")) mat.SetTexture("_MetallicGlossMap", null);
             if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0.25f);
             if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", 0f);
-            Jotunn.Logger.LogInfo($"StoneWand: material drewna - shader={mat.shader.name}, tekstura={(mat.mainTexture ? mat.mainTexture.name : "null")}");
+            Jotunn.Logger.LogDebug($"StoneWand: material drewna - shader={mat.shader.name}, tekstura={(mat.mainTexture ? mat.mainTexture.name : "null")}");
             return mat;
         }
 

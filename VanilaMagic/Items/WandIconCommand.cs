@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Jotunn.Entities;
 using UnityEngine;
@@ -21,7 +22,7 @@ namespace VanilaMagic.Items
     {
         public override string Name => "wandicon";
 
-        public override string Help => "wandicon [item] [rx ry rz] [fov] [dist] - stroi kadr ikony renderowanej z modelu";
+        public override string Help => "wandicon [item] [rx ry rz] [fov] [dist] - stroi kadr ikony renderowanej z modelu | wandicon export [rozmiar] - zapisuje ikony jako PNG do BepInEx/VanilaMagicIcons";
 
         public override List<string> CommandOptionList() => RenderedIcons.Registered.ToList();
 
@@ -37,7 +38,19 @@ namespace VanilaMagic.Items
                 return;
             }
 
-            var item = RenderedIcons.Registered.FirstOrDefault(n => n.Equals(args[0], System.StringComparison.OrdinalIgnoreCase));
+            if (args[0].Equals("export", System.StringComparison.OrdinalIgnoreCase))
+            {
+                int size = args.Length >= 2 && int.TryParse(args[1], out var s) ? Mathf.Clamp(s, 64, 2048) : 512;
+                var dir = Path.Combine(BepInEx.Paths.BepInExRootPath, "VanilaMagicIcons");
+                foreach (var name in RenderedIcons.Registered.ToList())
+                {
+                    var path = RenderedIcons.Export(name, size, dir);
+                    Console.instance.Print(path != null ? $"wandicon export: {path}" : $"wandicon export: {name} nie wyszedl");
+                }
+                return;
+            }
+
+            var item =RenderedIcons.Registered.FirstOrDefault(n => n.Equals(args[0], System.StringComparison.OrdinalIgnoreCase));
             if (item == null)
             {
                 Console.instance.Print($"wandicon: nie znam itemu '{args[0]}' - dostepne: {string.Join(", ", RenderedIcons.Registered)}");

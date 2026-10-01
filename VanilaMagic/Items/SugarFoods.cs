@@ -301,7 +301,7 @@ namespace VanilaMagic.Items
             }
 
             conversion.m_to = drop;
-            Jotunn.Logger.LogInfo($"SugarFoods: piec {VanillaUncooked} -> {SweetbreadName}");
+            Jotunn.Logger.LogDebug($"SugarFoods: piec {VanillaUncooked} -> {SweetbreadName}");
         }
 
         // ------------------------------------------------------------------ narzedzia

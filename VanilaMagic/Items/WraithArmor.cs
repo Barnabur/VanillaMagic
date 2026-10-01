@@ -211,7 +211,7 @@ namespace VanilaMagic.Items
             {
                 _embeddedCapeNormal = normal;
                 _capeMat.SetTexture("_BumpMap", normal);
-                Jotunn.Logger.LogInfo($"WraithArmor: normalna peleryny z WraithCape_n.png ({normal.width}x{normal.height}), _BumpScale={_capeMat.GetFloat("_BumpScale"):0.00}");
+                Jotunn.Logger.LogDebug($"WraithArmor: normalna peleryny z WraithCape_n.png ({normal.width}x{normal.height}), _BumpScale={_capeMat.GetFloat("_BumpScale"):0.00}");
             }
             LogCapeMaterial();
         }
@@ -224,7 +224,7 @@ namespace VanilaMagic.Items
         /// </summary>
         private static void SetupCapeCutout(Material trollMat, Material reference)
         {
-            Jotunn.Logger.LogInfo($"WraithArmor: shader peleryny={trollMat.shader.name} keywords=[{string.Join(" ", trollMat.shaderKeywords)}]; " +
+            Jotunn.Logger.LogDebug($"WraithArmor: shader peleryny={trollMat.shader.name} keywords=[{string.Join(" ", trollMat.shaderKeywords)}]; " +
                                   $"wraith={(reference ? reference.shader.name : "null")} keywords=[{(reference ? string.Join(" ", reference.shaderKeywords) : "")}]");
             _capeMat.shaderKeywords = trollMat.shaderKeywords;
             _capeMat.EnableKeyword("_ALPHATEST_ON");
@@ -239,7 +239,7 @@ namespace VanilaMagic.Items
             _capeMat.SetFloat("_MetalGloss", 0f);
             _capeMat.SetFloat("_BumpScale", 1f);
             _capeMat.renderQueue = 2450; // AlphaTest
-            Jotunn.Logger.LogInfo($"WraithArmor: material peleryny keywords=[{string.Join(" ", _capeMat.shaderKeywords)}]");
+            Jotunn.Logger.LogDebug($"WraithArmor: material peleryny keywords=[{string.Join(" ", _capeMat.shaderKeywords)}]");
         }
 
         /// <summary>
@@ -476,7 +476,7 @@ namespace VanilaMagic.Items
             if (_embeddedCapeChecked) return _embeddedCapeAlbedo;
             _embeddedCapeChecked = true;
             _embeddedCapeAlbedo = LoadEmbeddedPng("WraithCape", "wraithcape_src");
-            if (_embeddedCapeAlbedo) Jotunn.Logger.LogInfo($"WraithArmor: albedo peleryny z WraithCape.png ({_embeddedCapeAlbedo.width}x{_embeddedCapeAlbedo.height})");
+            if (_embeddedCapeAlbedo) Jotunn.Logger.LogDebug($"WraithArmor: albedo peleryny z WraithCape.png ({_embeddedCapeAlbedo.width}x{_embeddedCapeAlbedo.height})");
             else Jotunn.Logger.LogWarning("WraithArmor: brak/zly zasob WraithCape.png - peleryna z kafelka Fenrisa");
             return _embeddedCapeAlbedo;
         }
@@ -525,7 +525,7 @@ namespace VanilaMagic.Items
                 }
             }
             var text = sb.ToString();
-            Jotunn.Logger.LogInfo("WraithArmor: " + text);
+            Jotunn.Logger.LogDebug("WraithArmor: " + text);
             return text;
         }
 
@@ -787,7 +787,7 @@ namespace VanilaMagic.Items
                 throw new InvalidOperationException("brak siatki w prefabie Chain");
             }
             var renderer = filter.GetComponent<MeshRenderer>();
-            Jotunn.Logger.LogInfo($"WraithArmor: ogniwa z Chain - mesh={filter.sharedMesh.name} bounds={filter.sharedMesh.bounds} mat={(renderer ? renderer.sharedMaterial.name : "null")}");
+            Jotunn.Logger.LogDebug($"WraithArmor: ogniwa z Chain - mesh={filter.sharedMesh.name} bounds={filter.sharedMesh.bounds} mat={(renderer ? renderer.sharedMaterial.name : "null")}");
             return (filter.sharedMesh, renderer ? renderer.sharedMaterial : null);
         }
 
@@ -859,7 +859,7 @@ namespace VanilaMagic.Items
                 stripSmr.rootBone = hoodSmr.rootBone;
                 stripSmr.updateWhenOffscreen = hoodSmr.updateWhenOffscreen;
                 stripSmr.enabled = false;
-                Jotunn.Logger.LogInfo($"WraithArmor: pas peleryny w kapturze ({stripMesh.vertexCount} wierzch.)");
+                Jotunn.Logger.LogDebug($"WraithArmor: pas peleryny w kapturze ({stripMesh.vertexCount} wierzch.)");
             }
             else if (UseCapeStrip) Jotunn.Logger.LogWarning($"WraithArmor: brak pasa peleryny w kapturze (hood={(bool)hoodSmr} mesh={(bool)stripMesh} mat={(bool)_capeMatStrip})");
         }

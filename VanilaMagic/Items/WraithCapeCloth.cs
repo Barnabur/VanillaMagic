@@ -157,7 +157,7 @@ namespace VanilaMagic.Items
                         madeFixed++;
                     }
                 }
-                Jotunn.Logger.LogInfo($"WraithCapeCloth: gora przypieta do kaptura - stale {fixedNow}+{madeFixed}/{positions.Length} punktow (do wiersza {FixedRow}), prebuild off");
+                Jotunn.Logger.LogDebug($"WraithCapeCloth: gora przypieta do kaptura - stale {fixedNow}+{madeFixed}/{positions.Length} punktow (do wiersza {FixedRow}), prebuild off");
             }
             catch (Exception ex)
             {
@@ -171,7 +171,7 @@ namespace VanilaMagic.Items
             try
             {
                 var cloths = FindCloths(prefab);
-                foreach (var cloth in cloths) Jotunn.Logger.LogInfo($"WraithCapeCloth: {cloth.name} {Apply(cloth)}");
+                foreach (var cloth in cloths) Jotunn.Logger.LogDebug($"WraithCapeCloth: {cloth.name} {Apply(cloth)}");
                 if (cloths.Length == 0) Jotunn.Logger.LogWarning("WraithCapeCloth: brak MagicaCloth na prefabie peleryny");
             }
             catch (Exception ex)

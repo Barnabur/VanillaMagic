@@ -195,7 +195,7 @@ namespace VanilaMagic.Items
 
             _lastFail = null;
             _indices = picked.ToArray();
-            Jotunn.Logger.LogInfo($"ClothChain {name}: peleryna {_renderer.name} (mesh {_renderer.sharedMesh.name}, {verts.Length} wierzch.), " +
+            Jotunn.Logger.LogDebug($"ClothChain {name}: peleryna {_renderer.name} (mesh {_renderer.sharedMesh.name}, {verts.Length} wierzch.), " +
                                   $"sciezka od x={m_sideX}: " + string.Join(", ", _indices.Select(i => $"#{i}({local[i].x:0.00},{local[i].y:0.00},{local[i].z:0.00})")));
             return true;
         }

@@ -47,7 +47,7 @@ namespace VanilaMagic.Items
                         bytes = memory.ToArray();
                     }
                     _bundle = AssetBundle.LoadFromMemory(bytes);
-                    if (_bundle) Jotunn.Logger.LogInfo($"ModAssets: bundle {BundleName} zaladowany ({bytes.Length / 1024} KB, {_bundle.GetAllAssetNames().Length} assetow)");
+                    if (_bundle) Jotunn.Logger.LogDebug($"ModAssets: bundle {BundleName} zaladowany ({bytes.Length / 1024} KB, {_bundle.GetAllAssetNames().Length} assetow)");
                     else Jotunn.Logger.LogError($"ModAssets: AssetBundle.LoadFromMemory zwrocil null dla {BundleName} ({bytes.Length} B) - bundle z innej wersji Unity?");
                 }
                 catch (Exception ex)
@@ -94,7 +94,7 @@ namespace VanilaMagic.Items
             }
 
             SwapAlbedo(prefab, albedo, albedoName);
-            Jotunn.Logger.LogInfo($"ModAssets: {prefab.name} <- {meshName} + {albedoName} ({filters} MeshFilter)");
+            Jotunn.Logger.LogDebug($"ModAssets: {prefab.name} <- {meshName} + {albedoName} ({filters} MeshFilter)");
             return true;
         }
 
@@ -108,7 +108,7 @@ namespace VanilaMagic.Items
             var albedo = Load<Texture2D>(albedoName);
             if (!albedo) return false;
             var swapped = SwapAlbedo(prefab, albedo, albedoName);
-            if (swapped > 0) Jotunn.Logger.LogInfo($"ModAssets: {prefab.name} <- {albedoName} ({swapped} materialow)");
+            if (swapped > 0) Jotunn.Logger.LogDebug($"ModAssets: {prefab.name} <- {albedoName} ({swapped} materialow)");
             return true;
         }
 

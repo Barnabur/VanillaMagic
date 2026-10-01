@@ -13,7 +13,7 @@ namespace VanilaMagic.Items
     /// - baza (animacja staff_shield, atak, dzwieki): StaffShield
     /// - AoE leczenia: klon DvergerStaffHeal_aoe (reczny heal_aoe byl jego kopia)
     ///   z podpietym wlasnym Heal_SE
-    /// - rekojesc: kosc (mesh "Bone" z BoneFragments), glowica: AncientSeed,
+    /// - rekojesc: kosc (mesh "Bone"; w recepcie WitheredBone z bagna), glowica: AncientSeed,
     ///   zielone plomienie: nieaktywne dziecko "flames" z DvergerStaffHeal_aoe
     /// Wartosci transformow i Aoe przeniesione 1:1 z recznych prefabow z bundla.
     /// </summary>
@@ -60,7 +60,7 @@ namespace VanilaMagic.Items
                     MinStationLevel = 2,
                     Requirements = new[]
                     {
-                        new RequirementConfig("BoneFragments", 10, 5),
+                        new RequirementConfig("WitheredBone", 10, 5),
                         new RequirementConfig("AncientSeed", 2, 1),
                         new RequirementConfig("Ectoplasm", 5, 3),
                     },
@@ -70,6 +70,9 @@ namespace VanilaMagic.Items
                 ItemManager.Instance.AddItem(item);
 
                 var shared = item.ItemDrop.m_itemData.m_shared;
+                // wytrzymalosc wspolna dla wszystkich rozdzek: 100 +25 na poziom
+                shared.m_maxDurability = 100f;
+                shared.m_durabilityPerLevel = 25f;
                 shared.m_attack.m_attackProjectile = healAoe;
                 shared.m_attack.m_attackEitr = 20f;
                 // heal_aoe ma m_useAttackSettings, wiec Aoe.Setup nadpisuje jego SE hashem
@@ -368,7 +371,7 @@ namespace VanilaMagic.Items
             }
             else
             {
-                Jotunn.Logger.LogInfo("HealingStaff: healing_flame niekompletny (menu?) - ponowie przy wejsciu do swiata");
+                Jotunn.Logger.LogDebug("HealingStaff: healing_flame niekompletny (menu?) - ponowie przy wejsciu do swiata");
                 PrefabManager.OnVanillaPrefabsAvailable -= ApplyFlamesMaterial;
                 PrefabManager.OnVanillaPrefabsAvailable += ApplyFlamesMaterial;
             }
@@ -390,7 +393,7 @@ namespace VanilaMagic.Items
             var shader = candidates.FirstOrDefault(s => s.isSupported);
             var waterfog = Resources.FindObjectsOfTypeAll<Texture2D>()
                 .FirstOrDefault(t => t.name == "waterfog");
-            Jotunn.Logger.LogInfo(
+            Jotunn.Logger.LogDebug(
                 "HealingStaff: shadery-kandydaci mgielki: " +
                 string.Join("; ", candidates.Select(s => $"id={s.GetInstanceID()} supported={s.isSupported}")) +
                 $", waterfog={(bool)waterfog}");

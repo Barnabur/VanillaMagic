@@ -24,7 +24,7 @@ namespace VanilaMagic
     {
         public const string PluginGUID = "com.barnabur.vanilamagic";
         public const string PluginName = "VanilaMagic";
-        public const string PluginVersion = "0.0.2";
+        public const string PluginVersion = "0.0.3";
         private GameObject BlueMushroomPrefab;
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -37,14 +37,14 @@ namespace VanilaMagic
             // Add translations for the surtlingwand
             Localization.AddTranslation("English", new Dictionary<string, string>
             {
-                { "item_wandfireball", "Surtling Wand" },
+                { "item_wandfireball", "Flame Wand" },
                 { "item_staffheal", "Healing Staff" },
                 { "item_wandfireball_description", "A bronze wand crowned with a surtling core that never stops smouldering. Spits a stream of embers that burst into flame on impact." },
                 { "item_wandfrost", "Frost Wand" },
                 { "item_wandfrost_description", "A crystal-tipped wand that hurls a bolt of biting cold. Bursts on impact." },
                 { "item_wandstone", "Stone Wand" },
                 { "item_wandstone_description", "A black metal claw gripping a shard of obsidian. Hurls a heavy rock that shatters on impact and knocks foes back." },
-                { "item_staffheal_description", "Bone and ancient seeds bound together with ectoplasm. The greydwarves' stolen life seeps from it, mending the wounds of everyone who stands close." },
+                { "item_staffheal_description", "Withered bone and ancient seeds bound together with ectoplasm. The greydwarves' stolen life seeps from it, mending the wounds of everyone who stands close." },
                 { "se_heal", "Healing" },
                 { "se_heal_desc", "Health per second:\n<color=#ff8000>{0}</color> <color=#ffff00>({1})</color>" },
                 { "item_bluemushroom", "Blue Mushroom" },
@@ -83,7 +83,7 @@ namespace VanilaMagic
                 { "item_wandfrost_description", "Różdżka zakończona kryształem, która ciska pocisk przeszywającego zimna. Rozpryskuje się przy uderzeniu." },
                 { "item_wandstone", "Różdżka kamienia" },
                 { "item_wandstone_description", "Szpon z czarnego metalu ściskający odłamek obsydianu. Ciska ciężkim kamieniem, który roztrzaskuje się przy uderzeniu i odrzuca wrogów." },
-                { "item_staffheal_description", "Kości i starożytne nasiona spojone ektoplazmą. Skradzione Szarłom życie sączy się z niego, zasklepiając rany każdego, kto stoi w pobliżu." },
+                { "item_staffheal_description", "Wysuszone kości i starożytne nasiona spojone ektoplazmą. Skradzione Szarłom życie sączy się z niego, zasklepiając rany każdego, kto stoi w pobliżu." },
                 { "se_heal", "Leczenie" },
                 { "se_heal_desc", "Zdrowie na sekundę:\n<color=#ff8000>{0}</color> <color=#ffff00>({1})</color>" },
                 { "item_bluemushroom", "Niebieski grzyb" },
@@ -135,6 +135,8 @@ namespace VanilaMagic
             new Harmony(PluginGUID).PatchAll(typeof(VanilaMagic).Assembly);
             PrefabManager.OnVanillaPrefabsAvailable += SetupBlueMushroom;
             DungeonManager.OnVanillaRoomsAvailable += () => MushroomCaveRooms.AddMushroomRooms(BlueMushroomPrefab);
+#if DEBUG
+            // komendy deweloperskie - tylko w buildzie Debug, nie trafiaja do wydania
             CommandManager.Instance.AddConsoleCommand(new SpawnMushroomRoomCommand());
             CommandManager.Instance.AddConsoleCommand(new WhichRoomCommand());
             CommandManager.Instance.AddConsoleCommand(new NearSpawnsCommand());
@@ -143,6 +145,7 @@ namespace VanilaMagic
             CommandManager.Instance.AddConsoleCommand(new Items.DumpStaffCommand());
             CommandManager.Instance.AddConsoleCommand(new Items.WraithTintCommand());
             CommandManager.Instance.AddConsoleCommand(new Items.WandIconCommand());
+#endif
             // To learn more about Jotunn's features, go to
             // https://valheim-modding.github.io/Jotunn/tutorials/overview.html
         }

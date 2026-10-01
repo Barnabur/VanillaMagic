@@ -25,12 +25,13 @@ namespace VanilaMagic.Items
         // Wartosci przeniesione 1:1 z recznego prefabu z bundla (wand.mat + transformy dzieci)
         private static readonly Color BronzeTint = new Color(1f, 0.8994f, 0.5802f);
 
-        // ~25 DPS na q1 / ~31 na q4 (baza -32% wzgledem Crude bow + ognista strzala) - AoE, wiec ponizej broni bialej z brazu
-        private const float BluntDamage = 22f;
-        private const float FireDamage = 15f;
+        // ~27 DPS na q1 / ~33 na q4 (20 obuchu + 20 ognia co 1.5 s)
+        private const float BluntDamage = 20f;
+        private const float FireDamage = 20f;
         private const float FireDamagePerLevel = 3f;
         private const float BurstInterval = 1.5f;
-        private const float AttackEitr = 10f;
+        private const float AttackEitr = 7f;
+        private const float LaunchAngleUp = 3f;
 
         public static void Register()
         {
@@ -209,11 +210,14 @@ namespace VanilaMagic.Items
             ItemManager.Instance.AddItem(item);
 
             var shared = item.ItemDrop.m_itemData.m_shared;
+            // wytrzymalosc wspolna dla wszystkich rozdzek: 100 +25 na poziom
+            shared.m_maxDurability = 100f;
+            shared.m_durabilityPerLevel = 25f;
             // Stan animacji ZOSTAJE "Staves": seria "staff_rapidfire" w warstwie bazowej animatora
             // wchodzi tylko ze stanu ruchu kostura; z OneHanded InAttack() jest false i strzaly
             // leca w losowe strony. Jednoreczny blok robi OneHandedBlock (statei tylko na czas bloku).
             OneHandedBlock.Register(shared.m_name);
-            // balans: jeden strzal = Crude bow + ognista strzala (22 + 11 przebicia, 22 ognia) -15% i -20%,
+            // balans: jeden strzal ~ Crude bow + ognista strzala (20 obuchu, 20 ognia),
             // tu przebicie -> obuch (zelazna kula); z poziomem rosnie tylko ogien, jak w Staff of Embers
             shared.m_damages.m_frost = 0f;
             shared.m_damages.m_blunt = BluntDamage;
@@ -229,17 +233,22 @@ namespace VanilaMagic.Items
             // Tempo strzalow to dana ataku, nie animacja: FireProjectileBurst odpala sie
             // co m_burstInterval (baza 0.2 s). Eitr idzie per strzal (m_perBurstResourceUsage).
             var attack = shared.m_attack;
-            Jotunn.Logger.LogInfo(
+            Jotunn.Logger.LogDebug(
                 $"{prefabName}: bazowy atak StaffIceShards - bursts={attack.m_projectileBursts}, " +
                 $"interval={attack.m_burstInterval}s, pociski/burst={attack.m_projectiles}, " +
                 $"eitr={attack.m_attackEitr}, rozrzut={attack.m_projectileAccuracy}, " +
-                $"wysokosc={attack.m_attackHeight}");
+                $"wysokosc={attack.m_attackHeight}, launchAngle={attack.m_launchAngle}");
             attack.m_burstInterval = BurstInterval;
             attack.m_attackEitr = AttackEitr;
 
             // punkt startu pocisku = pozycja postaci + up * m_attackHeight (+ forward/right);
             // ~1/4 wzrostu postaci nizej, zeby kula wylatywala z rozdzki, a nie znad glowy
             attack.m_attackHeight -= 0.45f;
+
+            // kula z StaffFireball ma grawitacje, a atak StaffIceShards nie kompensuje opadania
+            // (pocisk lodu leci prosto) - strzaly ladowaly wyraznie ponizej celownika.
+            // Staff of Embers ma na to launchAngle -5 (ujemny = wyzej); dajemy 3 stopnie w gore (6 przestrzeliwalo).
+            attack.m_launchAngle -= LaunchAngleUp;
 
             // celnosc: nizsza wartosc = mniejszy rozrzut (frost staff celowo strzela na oslep);
             // Min obowiazuje przy skillu 0, docelowa przy wysokim skillu

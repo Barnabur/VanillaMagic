@@ -67,7 +67,7 @@ namespace VanilaMagic.Items
             proj.m_ttl = 10f;
             proj.m_doOwnerRaytest = true;
             proj.m_hitNoise = 30f;
-            Jotunn.Logger.LogInfo(
+            Jotunn.Logger.LogDebug(
                 $"FrostWand: pocisk bazowy - hitEffects=" +
                 string.Join(",", proj.m_hitEffects?.m_effectPrefabs?.Select(e => e.m_prefab ? e.m_prefab.name : "null") ?? new string[0]) +
                 $", spawnOnHit={(proj.m_spawnOnHit ? proj.m_spawnOnHit.name : "null")}, rayRadius={proj.m_rayRadius}");
@@ -103,6 +103,9 @@ namespace VanilaMagic.Items
             ItemManager.Instance.AddItem(item);
 
             var shared = item.ItemDrop.m_itemData.m_shared;
+            // wytrzymalosc wspolna dla wszystkich rozdzek: 100 +25 na poziom
+            shared.m_maxDurability = 100f;
+            shared.m_durabilityPerLevel = 25f;
             // StaffFireball ma blunt 120 + fire 120 (+6 fire/lvl) - zerujemy i dajemy frost
             shared.m_damages = new HitData.DamageTypes { m_frost = FrostDamage };
             shared.m_damagesPerLevel = new HitData.DamageTypes { m_frost = FrostDamagePerLevel };
@@ -114,7 +117,7 @@ namespace VanilaMagic.Items
             var attack = shared.m_attack;
             attack.m_attackProjectile = projectile;
             attack.m_attackEitr = AttackEitr;
-            Jotunn.Logger.LogInfo(
+            Jotunn.Logger.LogDebug(
                 $"{PrefabName}: bazowy atak StaffFireball - vel={attack.m_projectileVel}, " +
                 $"launchAngle={attack.m_launchAngle}, wysokosc={attack.m_attackHeight}, offset={attack.m_attackOffset}");
             // rozdzka jest krotka (glowica ~0.55 m od dloni) - fireball vanilla startuje
@@ -213,7 +216,7 @@ namespace VanilaMagic.Items
             crystal.transform.localScale = scale;
             crystal.transform.localRotation = rotation;
             crystal.transform.localPosition = new Vector3(0f, 0f, CageCenter) - rotation * Vector3.Scale(bounds.center, scale);
-            Jotunn.Logger.LogInfo(
+            Jotunn.Logger.LogDebug(
                 $"FrostWand: krysztal mesh={(crystalMesh ? crystalMesh.name : "null")} bounds.size={bounds.size} " +
                 $"center={bounds.center} srcScale={crystalSrc.localScale} -> wymiary vanilla={extents}, dluga os={longAxis}, skala={scale}");
 

@@ -144,7 +144,7 @@ namespace VanilaMagic.Items
             if (!logged)
             {
                 logged = true;
-                Jotunn.Logger.LogInfo($"CrystalSugar: {source.name} shader={mat.shader.name} albedo={tex.name} {tex.width}x{tex.height} " +
+                Jotunn.Logger.LogDebug($"CrystalSugar: {source.name} shader={mat.shader.name} albedo={tex.name} {tex.width}x{tex.height} " +
                                       $"emisja={(emissive ? "tak" : "NIE - zostaje sam tint")}");
             }
             return mat;
