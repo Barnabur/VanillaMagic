@@ -1,58 +1,50 @@
-# JötunnModStub
+# VanilaMagic
 
-A Valheim mod stub project using [Jötunn](https://github.com/Valheim-Modding/Jotunn) including build tools and a basic Unity project stub.
-There is no actual plugin content included, just a minimum plugin class. 
+**Vanilla-friendly early-game magic for Valheim.**
 
-#  Setup Guide
+VanilaMagic adds a small set of basic, not overpowered magic tools you can use from the
+**Black Forest through the Plains**: four wands and staves, early eitr foods, and a wraith
+mage armor set. Everything is built at runtime from the game's own models, materials and
+effects, so it looks and feels like vanilla Valheim.
 
-Please see [Jötunn Docs](https://valheim-modding.github.io/Jotunn/guides/overview.html) detailed documentation and setup.
+- **Mod page, features and changelog:** [VanilaMagic/README.md](VanilaMagic/README.md). This is the same text that appears on Thunderstore.
+- **Download:** Thunderstore (install with r2modman or Thunderstore Mod Manager).
 
-### Post Build automations
+## Building from source
 
-Included in this repo is a PowerShell script `publish.ps1`.
-The script is referenced in the project file as a post-build event.
-Depending on the chosen configuration in Visual Studio the script executes the following actions.
+Requirements:
 
-### Building Debug
+- Valheim with [BepInExPack Valheim](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/)
+- .NET SDK (the project targets `net48`)
+- [Jötunn](https://github.com/Valheim-Modding/Jotunn) 2.30.2, pulled in via NuGet (`JotunnLib`)
 
-The compiled dll and a dll.mdb debug file are copied to `<ValheimDir>\BepInEx\plugins` (or the path set in MOD_DEPLOYPATH).
+Setup:
 
-### Building Release
+1. Edit `Environment.props` and set `VALHEIM_INSTALL` to your Valheim folder. `MOD_DEPLOYPATH` defaults to `<Valheim>\BepInEx\plugins`.
+2. Build:
 
-A compressed file with the binaries is created in `<JotunnModStub>\Packages`ready for upload to ThunderStore.
-Dont forget to include your information in the manifest.json and to change the project's readme file.
+   ```bash
+   dotnet build VanilaMagic.sln -c Debug
+   ```
 
-## Developing Assets with Unity
+| Configuration | Result |
+|---|---|
+| **Debug** | DLL copied to `BepInEx/plugins/VanilaMagic/`. Developer console commands are registered (`wandicon`, `wraithtint`, `dumpstaff`, `mushroomroom`, `whichroom`, `nearspawns`, `blinkspawn`, `mushroomonly`). |
+| **Release** | Thunderstore package `VanilaMagic/bin/Release/net48/VanilaMagic.zip`, built from `VanilaMagic/Package` (manifest, icon) and `VanilaMagic/README.md`. No developer commands. |
 
-New Assets can be created with Unity and imported into Valheim using the mod.
-A Unity project is included in this repository under `<JotunnModStub>\JotunnModUnity`.
+Diagnostic logging uses `LogDebug`. To see it, set `LogLevels = All` in `BepInEx/config/BepInEx.cfg`.
 
-### Unity Editor Setup
+## Repository layout
 
-1. [Download](https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe) UnityHub directly from Unity or install it with the Visual Studio Installer via `Individual Components` -> `Visual Studio Tools for Unity`
-2. You will need an Unity account to register your PC and get a free licence. Create the account, login with it in Unity Hub and get your licence via `Settings` -> `Licence Management`
-3. Install Unity Editor version 2022.3.17f
-4. Compile the project. This copies all assemblies into `<JotunnModStub>\JotunnModUnity\Assets\Assemblies`. Don't open Unity yet before this step, it will remove assembly references.
-5. **Warning:** These assembly files are copyrighted material and you can theoretically get into trouble when you distribute them in your github repository. To avoid that there is a .gitignore file in the Unity project folder. Keep that when you clone or copy this repository
-6. Open Unity Hub and add the JotunnModUnity project
-7. Open the project in Unity
-8. Install the `AssetBundle Browser` package in the Unity Editor via `Window`-> `Package Manager` for easy bundle creation
+| Path | Contents |
+|---|---|
+| `VanilaMagic/` | The plugin. `Items/` holds the wands, foods and armor, `DungeonRooms/` the Frost Cave mushroom rooms (see its README), `StatusEffects/` the status effects. |
+| `VanilaMagic/Package/` | Thunderstore manifest and icon. |
+| `VanilaMagic/Assets/` | Embedded resources: item icons, cape textures and the `vanilamagic` asset bundle. |
+| `VanilaMagicUnity/` | Unity 6 (6000.0.75f1) stub project used to build the asset bundle. |
+| `tools/` | Offline helper scripts (prefab dump, glTF export). |
+| `art/` | Source art (wand renders, mod icon). |
 
-## Debugging
+## Credits
 
-See the Wiki page [Debugging Plugins via IDE](https://github.com/Valheim-Modding/Wiki/wiki/Debugging-Plugins-via-IDE) for more information
-
-## Actions after a game update
-
-When Valheim updates it is likely that parts of the assembly files change.
-If this is the case, the references to the assembly files must be renewed in Visual Studio and Unity.
-
-### Prebuild actions
-
-1. There is a file called DoPrebuild.props included in the solution. When you set its only value to true, Jötunn will automatically generate publicized assemblies for you. Otherwise you have to do this step manually.
-
-### Unity actions
-
-1. Copy all `assembly_*.dll` from `<ValheimDir>\valheim_Data\Managed` into `<JotunnModStub>\JotunnModUnity\Assets\Assemblies`. <br />
-  **Do this directly in the filesystem - don't import the dlls in Unity**.
-2. Go to Unity Editor and press `Ctrl+R`. This reloads all files from the filesystem and "re-imports" the copied dlls into the project.
+Based on [JotunnModStub](https://github.com/Valheim-Modding/JotunnModStub) by the Valheim Modding Community.
