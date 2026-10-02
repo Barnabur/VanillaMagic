@@ -99,6 +99,7 @@ On a server, the server's values are synced to all players. Changes apply to cre
 ## Changelog
 
 ### 0.0.4
+- Wands and the Healing Staff lose 1 durability per shot (the Flame Wand per bolt in its stream, not once per attack).
 - New config file with server sync: Fenring Wolf Hair Bundle drop and Ghost Ectoplasm drop (chance and amount).
 - Plugin file renamed to `VanillaMagic.dll` to match the mod name. Mod managers handle this automatically. If you installed manually, delete the old `BepInEx/plugins/VanilaMagic` folder.
 

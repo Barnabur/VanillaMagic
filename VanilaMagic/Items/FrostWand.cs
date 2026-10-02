@@ -103,9 +103,11 @@ namespace VanilaMagic.Items
             ItemManager.Instance.AddItem(item);
 
             var shared = item.ItemDrop.m_itemData.m_shared;
-            // wytrzymalosc wspolna dla wszystkich rozdzek: 100 +25 na poziom
+            // wytrzymalosc wspolna dla wszystkich rozdzek: 100 +25 na poziom, -1 za kazdy strzal
             shared.m_maxDurability = 100f;
             shared.m_durabilityPerLevel = 25f;
+            shared.m_useDurability = true;
+            shared.m_useDurabilityDrain = 1f;
             // StaffFireball ma blunt 120 + fire 120 (+6 fire/lvl) - zerujemy i dajemy frost
             shared.m_damages = new HitData.DamageTypes { m_frost = FrostDamage };
             shared.m_damagesPerLevel = new HitData.DamageTypes { m_frost = FrostDamagePerLevel };
