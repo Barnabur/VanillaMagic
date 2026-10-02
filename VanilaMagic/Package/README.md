@@ -74,7 +74,7 @@ Install with **r2modman** or **Thunderstore Mod Manager**. BepInEx and Jötunn a
 
 ## Configuration
 
-Settings are in `BepInEx/config/com.barnabur.vanilamagic.cfg`, created on first launch. You can also edit them in game with [Configuration Manager](https://thunderstore.io/c/valheim/p/Azumatt/Official_BepInEx_ConfigurationManager/) (F1).
+Settings are in `BepInEx/config/com.barnabur.vanillamagic.cfg`, created on first launch. You can also edit them in game with [Configuration Manager](https://thunderstore.io/c/valheim/p/Azumatt/Official_BepInEx_ConfigurationManager/) (F1).
 
 | Setting | Default | Description |
 |---|---|---|

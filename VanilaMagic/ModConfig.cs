@@ -4,7 +4,7 @@ using BepInEx.Configuration;
 namespace VanilaMagic
 {
     /// <summary>
-    /// Ustawienia moda w BepInEx/config/com.barnabur.vanilamagic.cfg.
+    /// Ustawienia moda w BepInEx/config/com.barnabur.vanillamagic.cfg.
     /// Wszystkie wpisy sa IsAdminOnly: Jotunn synchronizuje je z serwera do klientow,
     /// wiec na serwerze obowiazuja wartosci serwera (dropy i tak liczy wlasciciel stwora).
     /// Zmiana w trakcie gry (edycja pliku, Configuration Manager, synchronizacja z serwera)

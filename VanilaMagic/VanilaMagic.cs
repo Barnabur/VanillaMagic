@@ -22,7 +22,7 @@ namespace VanilaMagic
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     internal class VanilaMagic : BaseUnityPlugin
     {
-        public const string PluginGUID = "com.barnabur.vanilamagic";
+        public const string PluginGUID = "com.barnabur.vanillamagic";
         public const string PluginName = "VanillaMagic";
         public const string PluginVersion = "0.0.4";
         private GameObject BlueMushroomPrefab;

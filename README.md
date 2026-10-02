@@ -9,7 +9,7 @@ effects, so it looks and feels like vanilla Valheim.
 
 - **Mod page, features and changelog:** [VanilaMagic/README.md](VanilaMagic/README.md). This is the same text that appears on Thunderstore.
 - **Download:** Thunderstore (install with r2modman or Thunderstore Mod Manager).
-- **Configuration:** `BepInEx/config/com.barnabur.vanilamagic.cfg`, synced from the server to all players. The Ghost Ectoplasm and Fenring Wolf Hair Bundle drops (chance and amount) can be changed there. All settings are listed in [VanilaMagic/README.md](VanilaMagic/README.md#configuration).
+- **Configuration:** `BepInEx/config/com.barnabur.vanillamagic.cfg`, synced from the server to all players. The Ghost Ectoplasm and Fenring Wolf Hair Bundle drops (chance and amount) can be changed there. All settings are listed in [VanilaMagic/README.md](VanilaMagic/README.md#configuration).
 
 ## Building from source
 

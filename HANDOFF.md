@@ -17,7 +17,7 @@ co zostało i na czym można się przejechać.
 | gra | `C:\Program Files (x86)\Steam\steamapps\common\Valheim` |
 
 Mod: Jotunn **2.30.2**, Unity **6000.0.75f1**, BepInEx 5.4.22.
-`PluginGUID = "com.barnabur.vanilamagic"`, deploy do `BepInEx/plugins/VanilaMagic/`.
+`PluginGUID = "com.barnabur.vanillamagic"`, deploy do `BepInEx/plugins/VanilaMagic/`.
 Stary `JotunnModStub` i `Jotunn_2.24.3.dll` siedzą w `BepInEx/plugins_disabled/`.
 
 ## 2. Build i test
