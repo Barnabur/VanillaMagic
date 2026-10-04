@@ -98,6 +98,9 @@ On a server, the server's values are synced to all players. Changes apply to cre
 
 ## Changelog
 
+### 0.1.0
+- Flame Wand: the first bolt now fires after a short delay, so holding the button is no longer slower than re-clicking. Durability is used only when a bolt is actually fired.
+
 ### 0.0.4
 - Wands and the Healing Staff lose 1 durability per shot (the Flame Wand per bolt in its stream, not once per attack).
 - New config file with server sync: Fenring Wolf Hair Bundle drop and Ghost Ectoplasm drop (chance and amount).

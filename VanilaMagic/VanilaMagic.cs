@@ -24,7 +24,7 @@ namespace VanilaMagic
     {
         public const string PluginGUID = "com.barnabur.vanillamagic";
         public const string PluginName = "VanillaMagic";
-        public const string PluginVersion = "0.0.4";
+        public const string PluginVersion = "0.1.0";
         private GameObject BlueMushroomPrefab;
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html

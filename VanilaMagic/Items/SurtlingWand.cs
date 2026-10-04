@@ -30,6 +30,9 @@ namespace VanilaMagic.Items
         private const float FireDamage = 20f;
         private const float FireDamagePerLevel = 3f;
         private const float BurstInterval = 1.5f;
+        // pierwszy pocisk po tylu sekundach od zdarzenia ataku w animacji (wanilia: od razu);
+        // razem z rozbiegiem animacji klikanie od nowa nie moze byc szybsze niz trzymanie
+        private const float FirstShotDelay = 1f;
         private const float AttackEitr = 7f;
         private const float LaunchAngleUp = 3f;
 
@@ -215,7 +218,7 @@ namespace VanilaMagic.Items
             shared.m_durabilityPerLevel = 25f;
             shared.m_useDurability = true;
             shared.m_useDurabilityDrain = 1f;
-            BurstDurability.Register(shared.m_name);
+            BurstDurability.Register(shared.m_name, FirstShotDelay);
             // Stan animacji ZOSTAJE "Staves": seria "staff_rapidfire" w warstwie bazowej animatora
             // wchodzi tylko ze stanu ruchu kostura; z OneHanded InAttack() jest false i strzaly
             // leca w losowe strony. Jednoreczny blok robi OneHandedBlock (statei tylko na czas bloku).
