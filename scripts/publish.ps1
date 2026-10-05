@@ -63,7 +63,21 @@ if($Target.Equals("Release")) {
     New-Item -Type Directory -Path "$PackagePath\plugins" -Force
     Copy-Item -Path "$TargetPath\$TargetAssembly" -Destination "$PackagePath\plugins\$TargetAssembly" -Force
     Copy-Item -Path "$ProjectPath\README.md" -Destination "$PackagePath\README.md" -Force
-    Compress-Archive -Path "$PackagePath\*" -DestinationPath "$TargetPath\$name.zip" -Force
+    # Compress-Archive z Windows PowerShell 5.1 zapisuje sciezki z "\" - na serwerach linuksowych
+    # rozpakowuje sie to jako plik "plugins\X.dll" w korzeniu zamiast folderu plugins. Wpisy z "/".
+    Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
+    $zipPath = "$TargetPath\$name.zip"
+    if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+    $zip = [System.IO.Compression.ZipFile]::Open($zipPath, [System.IO.Compression.ZipArchiveMode]::Create)
+    try {
+        $root = (Resolve-Path $PackagePath).Path.TrimEnd('\') + '\'
+        Get-ChildItem -Path $PackagePath -File -Recurse | ForEach-Object {
+            $entry = $_.FullName.Substring($root.Length).Replace('\', '/')
+            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $_.FullName, $entry) | Out-Null
+        }
+    } finally {
+        $zip.Dispose()
+    }
 }
 
 # Pop Location

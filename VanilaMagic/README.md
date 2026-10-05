@@ -105,6 +105,8 @@ On a server, the server's values are synced to all players. Changes apply right 
 - Recipes: Healing Staff 10 Ectoplasm (was 5), Frost Wand 28 Silver (was 5), Stone Wand 18 Black Metal (was 5); upgrades cost more Bronze/Silver/Black Metal accordingly.
 - Wraith armor is now crafted and repaired at the Workbench (like the Fenris set) instead of the Forge.
 - Fix: Ghosts spawned in dungeons dropped the vanilla 1-4 Ectoplasm instead of the configured amount; the Ghost, Wraith and Fenring drop changes now apply to every spawned creature, and config changes apply to creatures already in the world.
+- Fix: updating from 0.0.3 could leave the old `VanilaMagic.dll` next to `VanillaMagic.dll`, so both versions loaded. The old file is now renamed to `.old` on startup (restart once afterwards; if it can't be renamed, the log says which file to delete).
+- Fix: the package zip used `\` in paths, which broke the folder layout on Linux servers.
 
 ### 0.1.0
 - Flame Wand: the first bolt now fires after a short delay, so holding the button is no longer slower than re-clicking. Durability is used only when a bolt is actually fired.

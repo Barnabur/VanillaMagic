@@ -112,10 +112,36 @@ namespace VanilaMagic
                 { "se_wraithset_tooltip", "Spętany łańcuchami upiora – umarli użyczają ci swojego kunsztu." },
             });
         }
+        // 0.0.3 wyszlo jako VanilaMagic.dll z GUID com.barnabur.vanilamagic. Menedzery i panele serwerow,
+        // ktore rozpakowuja nowa wersje na stara bez czyszczenia folderu, zostawiaja ten plik obok
+        // VanillaMagic.dll i BepInEx laduje oba pluginy (rozne GUID). Wylaczamy stary DLL na kolejny start.
+        private const string LegacyPluginGUID = "com.barnabur.vanilamagic";
+
+        private void DisableLegacyPlugin()
+        {
+            if (!BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(LegacyPluginGUID, out var legacy))
+            {
+                return;
+            }
+            string path = legacy.Location;
+            try
+            {
+                File.Move(path, path + ".old");
+                Jotunn.Logger.LogError($"Old VanilaMagic {legacy.Metadata.Version} found next to VanillaMagic {PluginVersion}: " +
+                    $"renamed {path} to .old. Restart the game/server - both copies are loaded in this session.");
+            }
+            catch (Exception e)
+            {
+                Jotunn.Logger.LogError($"Old VanilaMagic {legacy.Metadata.Version} found next to VanillaMagic {PluginVersion}. " +
+                    $"Delete {path} and restart ({e.Message}).");
+            }
+        }
+
         private void Awake()
         {
             // Jotunn comes with its own Logger class to provide a consistent Log style for all mods using it
             Jotunn.Logger.LogInfo("VanillaMagic has landed");
+            DisableLegacyPlugin();
             AddLocalizations();
             // config przed rejestracja - dropy czytaja z niego wartosci
             ModConfig.Bind(Config);
