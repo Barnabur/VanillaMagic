@@ -986,8 +986,9 @@ namespace VanilaMagic.Items
                 Name = "$" + token,
                 Description = "$" + token + "_description",
                 Icons = new[] { icon },
-                CraftingStation = "forge",
-                RepairStation = "forge",
+                // jak waniliowy set Fenrisa, z ktorego klonujemy - warsztat, nie kuznia
+                CraftingStation = "piece_workbench",
+                RepairStation = "piece_workbench",
                 MinStationLevel = 1,
                 // m_amount = koszt poziomu 1 (steruje tez odkrywaniem receptury); wyzsze poziomy z LeveledRequirements.
                 // Jotunn (RequirementConfig.IsValid) wycina wymagania z amount=0 i amountPerLevel=0, wiec skladniki

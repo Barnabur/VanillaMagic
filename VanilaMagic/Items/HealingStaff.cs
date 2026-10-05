@@ -62,7 +62,7 @@ namespace VanilaMagic.Items
                     {
                         new RequirementConfig("WitheredBone", 10, 5),
                         new RequirementConfig("AncientSeed", 2, 1),
-                        new RequirementConfig("Ectoplasm", 5, 3),
+                        new RequirementConfig("Ectoplasm", 10, 5),
                     },
                 };
 

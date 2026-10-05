@@ -25,14 +25,15 @@ namespace VanilaMagic.Items
         // Wartosci przeniesione 1:1 z recznego prefabu z bundla (wand.mat + transformy dzieci)
         private static readonly Color BronzeTint = new Color(1f, 0.8994f, 0.5802f);
 
-        // ~27 DPS na q1 / ~33 na q4 (20 obuchu + 20 ognia co 1.5 s)
+        // ~32 DPS na q1 / ~39 na q4 (20 obuchu + 20 ognia co 1.25 s)
         private const float BluntDamage = 20f;
         private const float FireDamage = 20f;
         private const float FireDamagePerLevel = 3f;
-        private const float BurstInterval = 1.5f;
+        private const float BurstInterval = 1.25f;
         // pierwszy pocisk po tylu sekundach od zdarzenia ataku w animacji (wanilia: od razu);
-        // razem z rozbiegiem animacji klikanie od nowa nie moze byc szybsze niz trzymanie
-        private const float FirstShotDelay = 1f;
+        // rozbieg animacji do zdarzenia ataku to ~1 s (pomiar w grze), wiec pierwszy pocisk
+        // wylatuje ~1.5 s po kliknieciu - dluzej niz odstep serii, wiec klikanie od nowa nie jest szybsze niz trzymanie
+        private const float FirstShotDelay = 0.5f;
         private const float AttackEitr = 7f;
         private const float LaunchAngleUp = 3f;
 
@@ -204,7 +205,7 @@ namespace VanilaMagic.Items
                 MinStationLevel = 1,
                 Requirements = new[]
                 {
-                    new RequirementConfig("Bronze", 7, 2),
+                    new RequirementConfig("Bronze", 7, 3),
                     new RequirementConfig("SurtlingCore", 1, 1),
                 },
             };
@@ -248,8 +249,12 @@ namespace VanilaMagic.Items
             attack.m_attackEitr = AttackEitr;
 
             // punkt startu pocisku = pozycja postaci + up * m_attackHeight (+ forward/right);
-            // ~1/4 wzrostu postaci nizej, zeby kula wylatywala z rozdzki, a nie znad glowy
-            attack.m_attackHeight -= 0.45f;
+            // na wysokosci glowicy rozdzki (klatka piersiowa); obnizenie o 0.45 mialo sens tylko
+            // przy bazowym starcie 2 m przed postacia - przy 0.6 m kula wylatywala z pasa
+            attack.m_attackHeight = 1.3f;
+            // m_attackRange to przesuniecie startu w przod (poziomy forward postaci) - bazowe 2 m
+            // sprawialo, ze kula pojawiala sie daleko przed graczem (najlepiej widac celujac w dol)
+            attack.m_attackRange = 0.6f;
 
             // kula z StaffFireball ma grawitacje, a atak StaffIceShards nie kompensuje opadania
             // (pocisk lodu leci prosto) - strzaly ladowaly wyraznie ponizej celownika.

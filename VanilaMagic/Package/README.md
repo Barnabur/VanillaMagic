@@ -20,9 +20,9 @@ Crafted at the **Forge**, one per biome, each a step up from the last:
 | Item | Biome | Forge lvl | Recipe | What it does |
 |---|---|---|---|---|
 | **Flame Wand** | Black Forest | 1 | 7 Bronze, 1 Surtling Core | Rapid stream of embers. 20 blunt + 20 fire per bolt, 7 eitr |
-| **Healing Staff** | Swamp | 2 | 10 Withered Bone, 2 Ancient Seed, 5 Ectoplasm | Heals you and everyone standing close, 20 eitr |
-| **Frost Wand** | Mountains | 3 | 5 Silver, 1 Crystal, 2 Freeze Gland | Single frost bolt that bursts on impact. 90 frost, 35 eitr |
-| **Stone Wand** | Plains | 4 | 5 Black Metal, 4 Obsidian, 5 Fine Wood | Heavy rock that shatters and knocks enemies back. 240 blunt, 50 eitr |
+| **Healing Staff** | Swamp | 2 | 10 Withered Bone, 2 Ancient Seed, 10 Ectoplasm | Heals you and everyone standing close for 10/15/20/25 s (by quality), 20 eitr |
+| **Frost Wand** | Mountains | 3 | 28 Silver, 1 Crystal, 2 Freeze Gland | Single frost bolt that bursts on impact. 90 frost, 35 eitr |
+| **Stone Wand** | Plains | 4 | 18 Black Metal, 4 Obsidian, 5 Fine Wood | Heavy rock that shatters and knocks enemies back. 240 blunt, 50 eitr |
 
 All of them can be upgraded at the Forge and use the vanilla magic skills.
 
@@ -40,7 +40,7 @@ You need eitr to cast, so the mod adds a few early sources of it:
 ### Wraith armor
 
 A 4-piece mage set for the Swamp-to-Mountains stretch (hood, robe, leggings, cape), made from
-wraith chains and Fenris hair:
+wraith chains and Fenris hair, crafted and upgraded at the **Workbench**:
 
 - Light armor (8, +3 per level) with eitr regeneration on every piece.
 - **Full set bonus**: +10 Elemental Magic and +10 Blood Magic.
@@ -83,7 +83,7 @@ Settings are in `BepInEx/config/com.barnabur.vanillamagic.cfg`, created on first
 | `Drops.GhostEctoplasmChance` | 10 | Chance (%) that a Ghost drops Ectoplasm (vanilla: 100) |
 | `Drops.GhostEctoplasmAmount` | 1 | How much Ectoplasm a Ghost drops (vanilla: 1-5) |
 
-On a server, the server's values are synced to all players. Changes apply to creatures that spawn after the change.
+On a server, the server's values are synced to all players. Changes apply right away, also to creatures already in the world.
 
 ## Compatibility
 
@@ -97,6 +97,14 @@ On a server, the server's values are synced to all players. Changes apply to cre
 - **Balance pass**: further tuning of wand damage and eitr costs, Wraith armor stats and drop rates, based on playtesting and feedback.
 
 ## Changelog
+
+### 0.1.1
+- Flame Wand: bolts now leave from the wand head at chest height instead of appearing far in front of you (most visible when aiming down).
+- Flame Wand: the first bolt fires about 1.5 s after you start the attack, then 1 bolt every 1.25 s (was 1.5 s).
+- Healing Staff: the heal lasts 10/15/20/25 s depending on the staff's quality (shown in the tooltip).
+- Recipes: Healing Staff 10 Ectoplasm (was 5), Frost Wand 28 Silver (was 5), Stone Wand 18 Black Metal (was 5); upgrades cost more Bronze/Silver/Black Metal accordingly.
+- Wraith armor is now crafted and repaired at the Workbench (like the Fenris set) instead of the Forge.
+- Fix: Ghosts spawned in dungeons dropped the vanilla 1-4 Ectoplasm instead of the configured amount; the Ghost, Wraith and Fenring drop changes now apply to every spawned creature, and config changes apply to creatures already in the world.
 
 ### 0.1.0
 - Flame Wand: the first bolt now fires after a short delay, so holding the button is no longer slower than re-clicking. Durability is used only when a bolt is actually fired.

@@ -9,7 +9,8 @@ namespace VanilaMagic.Items
     /// Waniliowo Fenring dropi tylko WolfFang 1-2 (100%) i trofeum (10%), a siersc lezy wylacznie
     /// jako pickable w jaskiniach lodowych (Pickable_Hairstrands*, hanging_hairstrands, fenrirhide_hanging).
     /// Bez m_levelMultiplier - gwiazdki nie zwiekszaja ilosci. Wpis dokladamy raz, a przy zmianie
-    /// configu tylko aktualizujemy jego wartosci.
+    /// configu tylko aktualizujemy jego wartosci. Instancje poprawia tez DropListPatch
+    /// (prefab z ZNetScene nie zawsze jest tym, ktory spawner instancjonuje).
     /// </summary>
     internal static class FenringHairDrop
     {
@@ -24,19 +25,21 @@ namespace VanilaMagic.Items
 
         private static void Apply()
         {
-            var hair = PrefabManager.Instance.GetPrefab(HairName);
             var fenring = PrefabManager.Instance.GetPrefab(CreatureName);
-            var drops = fenring ? fenring.GetComponent<CharacterDrop>() : null;
-            if (!hair || !drops)
-            {
-                // przy zmianie configu w menu glownym prefaby moga jeszcze nie istniec - nalozy sie przy wejsciu do swiata
-                Jotunn.Logger.LogDebug($"FenringHairDrop: brak prefabu {HairName} albo CharacterDrop na {CreatureName}");
-                return;
-            }
+            ApplyTo(fenring ? fenring.GetComponent<CharacterDrop>() : null, CreatureName);
+        }
+
+        /// <summary>Nakłada zmiany na CharacterDrop prefabu albo instancji. Idempotentne.</summary>
+        internal static void ApplyTo(CharacterDrop drops, string creature)
+        {
+            if (!drops || creature != CreatureName) return;
 
             var drop = drops.m_drops.FirstOrDefault(d => d.m_prefab && d.m_prefab.name == HairName);
             if (drop == null)
             {
+                // przy zmianie configu w menu glownym prefaby moga jeszcze nie istniec - nalozy sie przy wejsciu do swiata
+                var hair = PrefabManager.Instance.GetPrefab(HairName);
+                if (!hair) return;
                 drop = new CharacterDrop.Drop { m_prefab = hair, m_levelMultiplier = false };
                 drops.m_drops.Add(drop);
             }
@@ -45,7 +48,6 @@ namespace VanilaMagic.Items
             drop.m_amountMin = amount;
             drop.m_amountMax = amount;
             drop.m_chance = ModConfig.FenringHairChance.Value / 100f;
-            Jotunn.Logger.LogDebug($"FenringHairDrop: {CreatureName} dropi {amount} {HairName} z szansa {drop.m_chance:P0}");
         }
     }
 }

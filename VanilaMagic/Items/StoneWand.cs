@@ -129,7 +129,7 @@ namespace VanilaMagic.Items
                 MinStationLevel = 4,
                 Requirements = new[]
                 {
-                    new RequirementConfig("BlackMetal", 5, 2),
+                    new RequirementConfig("BlackMetal", 18, 7),
                     new RequirementConfig("Obsidian", 4, 2),
                     new RequirementConfig("FineWood", 5, 2),
                 },

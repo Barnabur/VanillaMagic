@@ -92,7 +92,7 @@ namespace VanilaMagic.Items
                 MinStationLevel = 3,
                 Requirements = new[]
                 {
-                    new RequirementConfig("Silver", 5, 2),
+                    new RequirementConfig("Silver", 28, 12),
                     new RequirementConfig("Crystal", 1, 1),
                     // polowa gruczolow z Staff of Frost (4 +2/poziom)
                     new RequirementConfig("FreezeGland", 2, 1),

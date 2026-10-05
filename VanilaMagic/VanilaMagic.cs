@@ -24,7 +24,7 @@ namespace VanilaMagic
     {
         public const string PluginGUID = "com.barnabur.vanillamagic";
         public const string PluginName = "VanillaMagic";
-        public const string PluginVersion = "0.1.0";
+        public const string PluginVersion = "0.1.1";
         private GameObject BlueMushroomPrefab;
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -46,7 +46,7 @@ namespace VanilaMagic
                 { "item_wandstone_description", "A black metal claw gripping a shard of obsidian. Hurls a heavy rock that shatters on impact and knocks foes back." },
                 { "item_staffheal_description", "Withered bone and ancient seeds bound together with ectoplasm. The greydwarves' stolen life seeps from it, mending the wounds of everyone who stands close." },
                 { "se_heal", "Healing" },
-                { "se_heal_desc", "Health per second:\n<color=#ff8000>{0}</color> <color=#ffff00>({1})</color>" },
+                { "se_heal_desc", "Health per second:\n<color=#ff8000>{0}</color> <color=#ffff00>({1})</color>\nDuration: <color=#ff8000>{2}s</color>" },
                 { "item_bluemushroom", "Blue Mushroom" },
                 { "item_bluemushroom_description", "A strange mushroom pulsing with magical energy." },
                 { "item_wildberries", "Wildberries" },
@@ -85,7 +85,7 @@ namespace VanilaMagic
                 { "item_wandstone_description", "Szpon z czarnego metalu ściskający odłamek obsydianu. Ciska ciężkim kamieniem, który roztrzaskuje się przy uderzeniu i odrzuca wrogów." },
                 { "item_staffheal_description", "Wysuszone kości i starożytne nasiona spojone ektoplazmą. Skradzione Szarłom życie sączy się z niego, zasklepiając rany każdego, kto stoi w pobliżu." },
                 { "se_heal", "Leczenie" },
-                { "se_heal_desc", "Zdrowie na sekundę:\n<color=#ff8000>{0}</color> <color=#ffff00>({1})</color>" },
+                { "se_heal_desc", "Zdrowie na sekundę:\n<color=#ff8000>{0}</color> <color=#ffff00>({1})</color>\nCzas trwania: <color=#ff8000>{2}s</color>" },
                 { "item_bluemushroom", "Niebieski grzyb" },
                 { "item_bluemushroom_description", "Dziwny grzyb pulsujący magiczną energią." },
                 { "item_wildberries", "Dzikie jagody" },

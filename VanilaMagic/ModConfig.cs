@@ -9,7 +9,7 @@ namespace VanilaMagic
     /// wiec na serwerze obowiazuja wartosci serwera (dropy i tak liczy wlasciciel stwora).
     /// Zmiana w trakcie gry (edycja pliku, Configuration Manager, synchronizacja z serwera)
     /// odpala <see cref="DropsChanged"/> - prefaby dostaja nowe wartosci od razu, a stwory
-    /// juz stojace w swiecie zachowuja stare do ponownego zaladowania strefy.
+    /// juz stojace w swiecie lapia je przy smierci (DropListPatch).
     /// </summary>
     internal static class ModConfig
     {
