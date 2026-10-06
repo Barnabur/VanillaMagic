@@ -98,14 +98,11 @@ On a server, the server's values are synced to all players. Changes apply right 
 
 ## Changelog
 
-### 0.1.2
-- Healing Staff: the heal now lasts 12/15/20/25 s depending on quality (was 10/15/20/25).
-- Healing Staff: costs 30% of your health per cast (was 40%, inherited from the vanilla Staff of Protection), plus 20 eitr as before.
-
 ### 0.1.1
 - Flame Wand: bolts now leave from the wand head at chest height instead of appearing far in front of you (most visible when aiming down).
 - Flame Wand: the first bolt fires about 1.5 s after you start the attack, then 1 bolt every 1.25 s (was 1.5 s).
-- Healing Staff: the heal lasts 10/15/20/25 s depending on the staff's quality (shown in the tooltip).
+- Healing Staff: the heal lasts 12/15/20/25 s depending on the staff's quality (shown in the tooltip).
+- Healing Staff: costs 30% of your health per cast (was 40%), plus 20 eitr as before.
 - Recipes: Healing Staff 10 Ectoplasm (was 5), Frost Wand 28 Silver (was 5), Stone Wand 18 Black Metal (was 5); upgrades cost more Bronze/Silver/Black Metal accordingly.
 - Wraith armor is now crafted and repaired at the Workbench (like the Fenris set) instead of the Forge.
 - Fix: Ghosts spawned in dungeons dropped the vanilla 1-4 Ectoplasm instead of the configured amount; the Ghost, Wraith and Fenring drop changes now apply to every spawned creature, and config changes apply to creatures already in the world.
