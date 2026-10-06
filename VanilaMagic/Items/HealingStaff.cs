@@ -77,6 +77,8 @@ namespace VanilaMagic.Items
                 shared.m_useDurabilityDrain = 1f;
                 shared.m_attack.m_attackProjectile = healAoe;
                 shared.m_attack.m_attackEitr = 20f;
+                // baza StaffShield kosztuje 40% HP
+                shared.m_attack.m_attackHealthPercentage = 30f;
                 // heal_aoe ma m_useAttackSettings, wiec Aoe.Setup nadpisuje jego SE hashem
                 // z broni - bez tego przypisania nie-gracze (tamy) nie dostana leczenia;
                 // przy okazji item pokazuje tooltip efektu (GetStatusEffectTooltip)
@@ -115,7 +117,7 @@ namespace VanilaMagic.Items
             var healEffect = ScriptableObject.CreateInstance<Heal_SE>();
             healEffect.name = HealSEName;
             healEffect.m_name = "$se_heal";
-            healEffect.m_ttl = 10f;
+            healEffect.m_ttl = 12f;
             healEffect.m_tickInterval = 1f;
             // m_healthPerTick ustawia Heal_SE.SetLevel przy nalozeniu (quality + skill);
             // pola m_healthOverTime* pominiete - dzialaja tylko przy m_healthOverTime > 0

@@ -20,7 +20,7 @@ Crafted at the **Forge**, one per biome, each a step up from the last:
 | Item | Biome | Forge lvl | Recipe | What it does |
 |---|---|---|---|---|
 | **Flame Wand** | Black Forest | 1 | 7 Bronze, 1 Surtling Core | Rapid stream of embers. 20 blunt + 20 fire per bolt, 7 eitr |
-| **Healing Staff** | Swamp | 2 | 10 Withered Bone, 2 Ancient Seed, 10 Ectoplasm | Heals you and everyone standing close for 10/15/20/25 s (by quality), 20 eitr |
+| **Healing Staff** | Swamp | 2 | 10 Withered Bone, 2 Ancient Seed, 10 Ectoplasm | Heals you and everyone standing close for 12/15/20/25 s (by quality), 20 eitr + 30% health |
 | **Frost Wand** | Mountains | 3 | 28 Silver, 1 Crystal, 2 Freeze Gland | Single frost bolt that bursts on impact. 90 frost, 35 eitr |
 | **Stone Wand** | Plains | 4 | 18 Black Metal, 4 Obsidian, 5 Fine Wood | Heavy rock that shatters and knocks enemies back. 240 blunt, 50 eitr |
 
@@ -97,6 +97,10 @@ On a server, the server's values are synced to all players. Changes apply right 
 - **Balance pass**: further tuning of wand damage and eitr costs, Wraith armor stats and drop rates, based on playtesting and feedback.
 
 ## Changelog
+
+### 0.1.2
+- Healing Staff: the heal now lasts 12/15/20/25 s depending on quality (was 10/15/20/25).
+- Healing Staff: costs 30% of your health per cast (was 40%, inherited from the vanilla Staff of Protection), plus 20 eitr as before.
 
 ### 0.1.1
 - Flame Wand: bolts now leave from the wand head at chest height instead of appearing far in front of you (most visible when aiming down).

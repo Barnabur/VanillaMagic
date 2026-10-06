@@ -20,7 +20,7 @@ Crafted at the **Forge**, one per biome, each a step up from the last:
 | Item | Biome | Forge lvl | Recipe | What it does |
 |---|---|---|---|---|
 | **Flame Wand** | Black Forest | 1 | 7 Bronze, 1 Surtling Core | Rapid stream of embers. 20 blunt + 20 fire per bolt, 7 eitr |
-| **Healing Staff** | Swamp | 2 | 10 Withered Bone, 2 Ancient Seed, 10 Ectoplasm | Heals you and everyone standing close for 10/15/20/25 s (by quality), 20 eitr |
+| **Healing Staff** | Swamp | 2 | 10 Withered Bone, 2 Ancient Seed, 10 Ectoplasm | Heals you and everyone standing close for 12/15/20/25 s (by quality), 20 eitr + 30% health |
 | **Frost Wand** | Mountains | 3 | 28 Silver, 1 Crystal, 2 Freeze Gland | Single frost bolt that bursts on impact. 90 frost, 35 eitr |
 | **Stone Wand** | Plains | 4 | 18 Black Metal, 4 Obsidian, 5 Fine Wood | Heavy rock that shatters and knocks enemies back. 240 blunt, 50 eitr |
 
@@ -98,6 +98,10 @@ On a server, the server's values are synced to all players. Changes apply right 
 
 ## Changelog
 
+### 0.1.2
+- Healing Staff: the heal now lasts 12/15/20/25 s depending on quality (was 10/15/20/25).
+- Healing Staff: costs 30% of your health per cast (was 40%, inherited from the vanilla Staff of Protection), plus 20 eitr as before.
+
 ### 0.1.1
 - Flame Wand: bolts now leave from the wand head at chest height instead of appearing far in front of you (most visible when aiming down).
 - Flame Wand: the first bolt fires about 1.5 s after you start the attack, then 1 bolt every 1.25 s (was 1.5 s).
@@ -105,6 +109,8 @@ On a server, the server's values are synced to all players. Changes apply right 
 - Recipes: Healing Staff 10 Ectoplasm (was 5), Frost Wand 28 Silver (was 5), Stone Wand 18 Black Metal (was 5); upgrades cost more Bronze/Silver/Black Metal accordingly.
 - Wraith armor is now crafted and repaired at the Workbench (like the Fenris set) instead of the Forge.
 - Fix: Ghosts spawned in dungeons dropped the vanilla 1-4 Ectoplasm instead of the configured amount; the Ghost, Wraith and Fenring drop changes now apply to every spawned creature, and config changes apply to creatures already in the world.
+- Fix: updating from 0.0.3 could leave the old `VanilaMagic.dll` next to `VanillaMagic.dll`, so both versions loaded. The old file is now renamed to `.old` on startup (restart once afterwards; if it can't be renamed, the log says which file to delete).
+- Fix: the package zip used `\` in paths, which broke the folder layout on Linux servers.
 
 ### 0.1.0
 - Flame Wand: the first bolt now fires after a short delay, so holding the button is no longer slower than re-clicking. Durability is used only when a bolt is actually fired.
