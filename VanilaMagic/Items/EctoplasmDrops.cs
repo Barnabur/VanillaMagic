@@ -9,7 +9,7 @@ namespace VanilaMagic.Items
     /// Przenosi zrodlo ektoplazmy na bagna, zeby GhostShake dalo sie zrobic w swoim biomie.
     /// Waniliowo ektoplazma leci wylacznie z Ghosta (1-5 szt., 100%), a Ghost nie ma wpisu
     /// w spawnerach biomow - siedzi w dungeonach i eventach. Upior (Wraith) lata po bagnach
-    /// noca, wiec to on dostaje ektoplazme (zawsze 1 szt.), a Ghost dropi ja juz tylko z 10% szansa.
+    /// noca, wiec to on dostaje ektoplazme (1-4 szt.), a Ghost dropi ja juz tylko z 10% szansa.
     ///
     /// Sama zmiana prefabu nie wystarcza: Ghosty ze spawnerow w kryptach dropily waniliowe 1-4
     /// (Random.Range(1, 5) - max jest wylaczny), wiec spawner nie instancjonuje prefabu z ZNetScene
@@ -21,8 +21,10 @@ namespace VanilaMagic.Items
     {
         public const string EctoplasmName = "Ectoplasm";
 
-        // Wraith: zawsze dokladnie 1 szt. (bez mnoznika za gwiazdki)
-        private const int WraithAmount = 1;
+        // Wraith: 1-4 szt. (bez mnoznika za gwiazdki). GenerateDropList losuje Random.Range(min, max)
+        // z WYLACZNYM max, wiec gorna granica w polu to 4 + 1.
+        private const int WraithAmountMin = 1;
+        private const int WraithAmountMax = 4;
 
         // Ghost: waniliowo 1-5 na 100%; szansa i ilosc z configu (domyslnie 1 szt. z 10% szansa)
 
@@ -61,7 +63,14 @@ namespace VanilaMagic.Items
 
         private static void AddToWraith(CharacterDrop drops)
         {
-            if (Find(drops) != null) return; // juz dolozone
+            var existing = Find(drops);
+            if (existing != null)
+            {
+                // juz dolozone - tylko wyrownujemy ilosc
+                existing.m_amountMin = WraithAmountMin;
+                existing.m_amountMax = WraithAmountMax + 1;
+                return;
+            }
 
             var ectoplasm = PrefabManager.Instance.GetPrefab(EctoplasmName);
             if (!ectoplasm) return;
@@ -69,8 +78,8 @@ namespace VanilaMagic.Items
             drops.m_drops.Add(new CharacterDrop.Drop
             {
                 m_prefab = ectoplasm,
-                m_amountMin = WraithAmount,
-                m_amountMax = WraithAmount,
+                m_amountMin = WraithAmountMin,
+                m_amountMax = WraithAmountMax + 1,
                 m_chance = 1f,
                 m_levelMultiplier = false,
             });

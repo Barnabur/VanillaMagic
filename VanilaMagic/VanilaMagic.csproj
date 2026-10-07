@@ -58,6 +58,7 @@
     <EmbeddedResource Include="Assets\Sweetbread.png" />
     <EmbeddedResource Include="Assets\FrostedSweetbreadUncooked.png" />
     <EmbeddedResource Include="Assets\VikingCupcake.png" />
+    <EmbeddedResource Include="Assets\MushroomSoup.png" />
     <!-- Albedo peleryny Szat Widma w ukladzie UV siatki cape2 (kolory Fenrisa, Colorize w runtime). Zrodlo: scratch make_cape_tex.py -->
     <EmbeddedResource Include="Assets\WraithCape.png" />
     <EmbeddedResource Include="Assets\WraithCape_n.png" />

@@ -21,8 +21,8 @@ Crafted at the **Forge**, one per biome, each a step up from the last:
 |---|---|---|---|---|
 | **Flame Wand** | Black Forest | 1 | 7 Bronze, 1 Surtling Core | Rapid stream of embers. 20 blunt + 20 fire per bolt, 7 eitr |
 | **Healing Staff** | Swamp | 2 | 10 Withered Bone, 2 Ancient Seed, 10 Ectoplasm | Heals you and everyone standing close for 12/15/20/25 s (by quality), 20 eitr + 30% health |
-| **Frost Wand** | Mountains | 3 | 28 Silver, 1 Crystal, 2 Freeze Gland | Single frost bolt that bursts on impact. 90 frost, 35 eitr |
-| **Stone Wand** | Plains | 4 | 18 Black Metal, 4 Obsidian, 5 Fine Wood | Heavy rock that shatters and knocks enemies back. 240 blunt, 50 eitr |
+| **Frost Wand** | Mountains | 3 | 28 Silver, 1 Crystal, 2 Freeze Gland | Single frost bolt that bursts on impact. 90 frost, 30 eitr |
+| **Stone Wand** | Plains | 4 | 18 Black Metal, 4 Obsidian, 5 Fine Wood | Heavy rock that shatters and knocks enemies back. 240 blunt, 40 eitr |
 
 All of them can be upgraded at the Forge and use the vanilla magic skills.
 
@@ -33,9 +33,12 @@ You need eitr to cast, so the mod adds a few early sources of it:
 - **Wildberries**: a glowing purple bush found in the **Black Forest** (more rarely in the Swamp and Plains). Eat the berries raw for a little eitr.
 - **Ghostshake** (Cauldron lvl 2): 4 Wildberries + 1 Ectoplasm. A light eitr meal (5 HP / 20 stamina / 40 eitr).
 - **Blue Mushroom**: grows in **Frost Caves** in the Mountains, using the game's own unused blue mushroom (15 HP / 10 stamina / 25 eitr).
+  - **Mushroom Soup** (Cauldron lvl 3): 1 Mushroom + 1 Yellow Mushroom + 1 Blue Mushroom makes 2 bowls (20 HP / 23 stamina / 25 eitr, 25 min).
 - **Crystal Sugar**: grind Crystal in the **Windmill**.
   - **Eyescream with Sprinkles** (Cauldron lvl 3): the Eyescream recipe + 1 Crystal Sugar, trading a little health and stamina for 10 eitr.
   - **Frosted Sweetbread**: Viking Cupcake dough + 1 Crystal Sugar at the Prep Table, then bake it. The frosted Viking Cupcake now gives 20 eitr (33 / 33 / 20). Baking plain dough gives the new unfrosted **Sweetbread** with vanilla stats.
+
+All of these foods can be placed with the **Serving Tray**, like vanilla food.
 
 ### Wraith armor
 
@@ -51,7 +54,7 @@ wraith chains and Fenris hair, crafted and upgraded at the **Workbench**:
 
 These make the ingredients reachable in their own biome:
 
-- **Wraiths** (Swamp, at night) always drop 1 **Ectoplasm**. **Ghosts** now drop it only 10% of the time.
+- **Wraiths** (Swamp, at night) always drop 1-4 **Ectoplasm** (same as the vanilla Ghost). **Ghosts** now drop it only 10% of the time.
 - **Fenrings** have a 25% chance to drop a **Wolf Hair Bundle**.
 
 The Ghost and Fenring drops can be changed in the [config](#configuration).
@@ -87,7 +90,7 @@ On a server, the server's values are synced to all players. Changes apply right 
 
 ## Compatibility
 
-- Wands, armor and foods are new items. Vanilla items are only touched where listed above (Viking Cupcake stats, the oven conversion, Ectoplasm/Fenring drops, the unused blue mushroom).
+- Wands, armor and foods are new items. Vanilla items are only touched where listed above (Viking Cupcake stats, the oven conversion, Ectoplasm/Fenring drops, the unused blue mushroom, the Serving Tray food list).
 - Frost Caves get variants of their rooms with mushroom spots. Only newly generated caves have mushrooms, so explore new areas or use a new world.
 - Mods that heavily rework the same drops or the Viking Cupcake may override each other's changes.
 
@@ -97,6 +100,12 @@ On a server, the server's values are synced to all players. Changes apply right 
 - **Balance pass**: further tuning of wand damage and eitr costs, Wraith armor stats and drop rates, based on playtesting and feedback.
 
 ## Changelog
+
+### 0.1.2
+- New food: **Mushroom Soup** (Cauldron lvl 3): 1 Mushroom + 1 Yellow Mushroom + 1 Blue Mushroom makes 2 bowls (20 HP / 23 stamina / 25 eitr, 25 min).
+- Serving Tray: Wildberries, Blue Mushroom, Ghostshake, Eyescream with Sprinkles, Sweetbread and Mushroom Soup can now be placed with it. Eyescream and Frosted Sweetbread show their new icons in the tray menu.
+- Frost Wand costs 30 eitr per shot (was 35), Stone Wand 40 (was 50).
+- Ectoplasm: Wraiths now drop 1-4 instead of 1 (same as the vanilla Ghost drop).
 
 ### 0.1.1
 - Flame Wand: bolts now leave from the wand head at chest height instead of appearing far in front of you (most visible when aiming down).

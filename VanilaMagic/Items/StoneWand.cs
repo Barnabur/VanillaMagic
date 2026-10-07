@@ -27,11 +27,11 @@ namespace VanilaMagic.Items
         private const string ProjectileName = "wand_stonebolt_projectile";
 
         // balans: cios ponad bron jednoreczna z czarnego metalu (95-113), okupiony
-        // ogromnym kosztem eitru - 2-3 strzaly z pelnego paska, potem trzeba czekac
+        // duzym kosztem eitru (40) - kilka strzalow z pelnego paska, potem trzeba czekac
         private const float BluntDamage = 240f;
         private const float BluntDamagePerLevel = 10f;
         private const float AttackForce = 100f;
-        private const float AttackEitr = 50f;
+        private const float AttackEitr = 40f;
         private const float ExplosionRadius = 2f;
         // skala wizualu glazu w pocisku (vanilla trollowy glaz ma 0.2293)
         private const float ProjectileRockScale = 0.08f;

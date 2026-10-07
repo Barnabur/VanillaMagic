@@ -14,7 +14,7 @@ co zostało i na czym można się przejechać.
 | zamrożony snapshot starego moda | `C:\Users\kamil\source\2\test2` — **nie rozwijać** |
 | waniliowe źródła do malowania | `C:\Users\kamil\source\2\vanilla_source` — **celowo poza repo** |
 | rip assetów gry | `E:\ValheimRIP_2026-09` (AssetRipper, Unity 6) |
-| gra | `C:\Program Files (x86)\Steam\steamapps\common\Valheim` |
+| gra | `C:\Games\Valheim_vanilla` (kopia bez Steama; build deployuje do `BepInEx\plugins`) |
 
 Mod: Jotunn **2.30.2**, Unity **6000.0.75f1**, BepInEx 5.4.22.
 `PluginGUID = "com.barnabur.vanillamagic"`, deploy do `BepInEx/plugins/VanilaMagic/`.
@@ -49,8 +49,8 @@ Rejestracja w `VanilaMagic.cs → Awake()`. **Kolejność ma znaczenie**: `WildB
 | item | baza | obrażenia | eitr | receptura |
 |---|---|---|---|---|
 | `SurtlingWand` | StaffIceShards | fire 10 (+6/lvl) | — | Bronze 7 + SurtlingCore 1, kuźnia |
-| `FrostWand` | StaffFireball | frost 30 (+5/lvl) ⚠ | 25 ⚠ | Silver 5 + Crystal 1 ⚠ |
-| `StoneWand` | StaffFireball | blunt 45 ⚠ | 25 ⚠ | BlackMetal 5 + Obsidian 4 + FineWood 5 ⚠ |
+| `FrostWand` | StaffFireball | frost 90 (+6/lvl) | 30 | Silver 28 + Crystal 1 + FreezeGland 2 |
+| `StoneWand` | StaffFireball | blunt 240 (+10/lvl) | 40 | BlackMetal 18 + Obsidian 4 + FineWood 5 |
 | `HealingStaff` | StaffShield | — (AoE heal) | 20 | Bronze 7 + SurtlingCore 1, kuźnia lvl 4 |
 
 ⚠ = placeholder do ustalenia z Kamilem.
@@ -61,13 +61,19 @@ Rejestracja w `VanilaMagic.cs → Awake()`. **Kolejność ma znaczenie**: `WildB
 | `Wildberry` | krzak `WildberryBush`, wegetacja Czarnego Lasu | 5 / 5 / 15 |
 | `MushroomBlue` (waniliowy, przerobiony) | pokoje frost cave | 15 / 10 / 25 |
 | `GhostShake` | kocioł lvl 2: Wildberry 4 + Ectoplasm 1 | 16 / 20 / 40 |
+| `MushroomSoup` | kocioł lvl 3: Mushroom + MushroomYellow + MushroomBlue → **2 szt.** | 20 / 23 / 25, regen 3, 1500 s; mesh Turnip Stew + albedo `MushroomSoup_d` z bundla, ikona własna |
 | `CrystalSugar` | **wiatrak**: Crystal → CrystalSugar 1:1 | surowiec |
 | `EyescreamSprinkles` | kocioł lvl 3: GreydwarfEye 3 + FreezeGland 1 + cukier 1 | 16 / 60 / 10 |
 | `Sweetbread` | piec z waniliowego Unbaked Sweetbread | 43 / 43 / 0 |
 | `FrostedSweetbreadUncooked` | stół kuchenny: Unbaked Sweetbread 1 + cukier 1 | jak waniliowy półprodukt |
 | `VikingCupcake` (waniliowy, przerobiony) | piec z powyższego | 33 / 33 / **20** |
 
-Ektoplazma: `EctoplasmDrops` przenosi ją na bagna — Wraith dostaje 1–2 @100%,
+Taca (`Feaster`): `ServingTray` dopisuje nasze jedzenie do `_FeasterPieceTable` (Wildberry,
+MushroomBlue, GhostShake, EyescreamSprinkles, Sweetbread, MushroomSoup). Wanilia nie ma osobnych
+prefabów — item jedzenia sam ma `Piece` + `WearNTear` (koszt = 1 szt. siebie). MushroomBlue ich nie
+miał, kopiujemy z `Mushroom`. Ikony/nazwy na `Piece` synchronizowane z itemem.
+
+Ektoplazma: `EctoplasmDrops` przenosi ją na bagna — Wraith dostaje 1–4 @100%,
 Ghostowi ścięte z 1–5 na 1–2.
 
 ### Zbroja

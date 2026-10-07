@@ -22,6 +22,7 @@ public static class BuildVanilaMagicBundle
         "Assets/GhostShake/VikingCupcake_body_mesh.asset",
         "Assets/GhostShake/VikingCupcake_body_D.png",
         "Assets/GhostShake/VikingCupcake_frosted_D.png",
+        "Assets/MushroomSoup/MushroomSoup_d.png", // turnipstew z brazowym wywarem i kolorowymi grzybkami (mesh waniliowy)
         "Assets/WraithArmor/WraithHood_mesh.asset", // kaptur Fenrisa z kolnierzem odsunietym nad peleryne (CapeLab w ripie)
         "Assets/WraithArmor/WraithCapeStrip_mesh.asset", // gorny pas peleryny z wagami kaptura (CapeLab.BuildCapeStrip) - bez fizyki (nieuzywany)
         "Assets/WraithArmor/WraithCape_mesh.asset", // cape2 z wagami kaptura w gornej czesci (CapeLab.ReweightCapeToHood), READABLE - MagicaCloth buduje w runtime

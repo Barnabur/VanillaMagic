@@ -25,11 +25,11 @@ namespace VanilaMagic.Items
         public const string PrefabName = "FrostWand";
         private const string ProjectileName = "wand_frostbolt_projectile";
 
-        // balans: tempo i eitr jak Staff of Embers (baza StaffFireball, 35 eitr), obrazenia
+        // balans: tempo jak Staff of Embers (baza StaffFireball, 35 eitr), eitr nizej (30), obrazenia
         // ~40% jego 240 - AoE, wiec celowo ponizej srebrnej broni bialej na jednym celu
         private const float FrostDamage = 90f;
         private const float FrostDamagePerLevel = 6f;
-        private const float AttackEitr = 35f;
+        private const float AttackEitr = 30f;
         private const float ExplosionRadius = 1.3f;
 
         public static void Register()

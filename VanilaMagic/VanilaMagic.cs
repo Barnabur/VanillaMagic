@@ -24,7 +24,7 @@ namespace VanilaMagic
     {
         public const string PluginGUID = "com.barnabur.vanillamagic";
         public const string PluginName = "VanillaMagic";
-        public const string PluginVersion = "0.1.1";
+        public const string PluginVersion = "0.1.2";
         private GameObject BlueMushroomPrefab;
         // Use this class to add your own localization to the game
         // https://valheim-modding.github.io/Jotunn/tutorials/localization.html
@@ -49,6 +49,8 @@ namespace VanilaMagic
                 { "se_heal_desc", "Health per second:\n<color=#ff8000>{0}</color> <color=#ffff00>({1})</color>\nDuration: <color=#ff8000>{2}s</color>" },
                 { "item_bluemushroom", "Blue Mushroom" },
                 { "item_bluemushroom_description", "A strange mushroom pulsing with magical energy." },
+                { "item_mushroomsoup", "Mushroom Soup" },
+                { "item_mushroomsoup_description", "Red, yellow and blue simmered together in one pot. Earthy, filling, and faintly glowing." },
                 { "item_wildberries", "Wildberries" },
                 { "item_wildberries_description", "Glowing purple berries. Sweet, and humming with eitr." },
                 { "item_ghostshake", "Ghostshake" },
@@ -88,6 +90,8 @@ namespace VanilaMagic
                 { "se_heal_desc", "Zdrowie na sekundę:\n<color=#ff8000>{0}</color> <color=#ffff00>({1})</color>\nCzas trwania: <color=#ff8000>{2}s</color>" },
                 { "item_bluemushroom", "Niebieski grzyb" },
                 { "item_bluemushroom_description", "Dziwny grzyb pulsujący magiczną energią." },
+                { "item_mushroomsoup", "Zupa grzybowa" },
+                { "item_mushroomsoup_description", "Czerwony, żółty i niebieski grzyb duszone razem w jednym garnku. Sycąca, pachnie lasem i lekko świeci." },
                 { "item_wildberries", "Dzikie jagody" },
                 { "item_wildberries_description", "Świecące fioletowe jagody. Słodkie i brzęczące od eitru." },
                 { "item_ghostshake", "Upiorny koktajl" },
@@ -159,9 +163,12 @@ namespace VanilaMagic
             Items.SugarFoods.Register();
             Items.HealingStaff.Register();
             Items.WraithArmor.Register();
+            Items.MushroomSoup.Register();
             // patche Harmony (LeveledRequirements: koszty ulepszen per poziom)
             new Harmony(PluginGUID).PatchAll(typeof(VanilaMagic).Assembly);
             PrefabManager.OnVanillaPrefabsAvailable += SetupBlueMushroom;
+            // ServingTray po itemach jedzenia i SetupBlueMushroom - podpina ich gotowe prefaby pod Tace
+            Items.ServingTray.Register();
             DungeonManager.OnVanillaRoomsAvailable += () => MushroomCaveRooms.AddMushroomRooms(BlueMushroomPrefab);
 #if DEBUG
             // komendy deweloperskie - tylko w buildzie Debug, nie trafiaja do wydania
