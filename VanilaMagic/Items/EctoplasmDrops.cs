@@ -26,6 +26,10 @@ namespace VanilaMagic.Items
         private const int WraithAmountMin = 1;
         private const int WraithAmountMax = 4;
 
+        // Trofeum Wraitha: waniliowo 5%, podbite do 33%
+        private const string WraithTrophyName = "TrophyWraith";
+        private const float WraithTrophyChance = 0.33f;
+
         // Ghost: waniliowo 1-5 na 100%; szansa i ilosc z configu (domyslnie 1 szt. z 10% szansa)
 
         public static void Register()
@@ -45,7 +49,11 @@ namespace VanilaMagic.Items
         {
             if (!drops) return;
             if (creature == "Ghost") NerfGhost(drops);
-            else if (creature == "Wraith") AddToWraith(drops);
+            else if (creature == "Wraith")
+            {
+                AddToWraith(drops);
+                BoostWraithTrophy(drops);
+            }
         }
 
         private static void NerfGhost(CharacterDrop drops)
@@ -83,6 +91,12 @@ namespace VanilaMagic.Items
                 m_chance = 1f,
                 m_levelMultiplier = false,
             });
+        }
+
+        private static void BoostWraithTrophy(CharacterDrop drops)
+        {
+            var trophy = drops.m_drops?.FirstOrDefault(d => d.m_prefab && d.m_prefab.name == WraithTrophyName);
+            if (trophy != null) trophy.m_chance = WraithTrophyChance;
         }
 
         private static CharacterDrop GetDrops(string creature)

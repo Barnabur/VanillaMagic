@@ -54,7 +54,7 @@ wraith chains and Fenris hair, crafted and upgraded at the **Workbench**:
 
 These make the ingredients reachable in their own biome:
 
-- **Wraiths** (Swamp, at night) always drop 1-4 **Ectoplasm** (same as the vanilla Ghost). **Ghosts** now drop it only 10% of the time.
+- **Wraiths** (Swamp, at night) always drop 1-4 **Ectoplasm** (same as the vanilla Ghost). Their trophy drops 33% of the time (vanilla: 5%). **Ghosts** now drop it only 10% of the time.
 - **Fenrings** have a 25% chance to drop a **Wolf Hair Bundle**.
 
 The Ghost and Fenring drops can be changed in the [config](#configuration).
@@ -100,6 +100,9 @@ On a server, the server's values are synced to all players. Changes apply right 
 - **Balance pass**: further tuning of wand damage and eitr costs, Wraith armor stats and drop rates, based on playtesting and feedback.
 
 ## Changelog
+
+### 0.1.3
+- Wraith Trophy drop chance raised to 33% (vanilla: 5%).
 
 ### 0.1.2
 - New food: **Mushroom Soup** (Cauldron lvl 3): 1 Mushroom + 1 Yellow Mushroom + 1 Blue Mushroom makes 2 bowls (20 HP / 23 stamina / 25 eitr, 25 min).

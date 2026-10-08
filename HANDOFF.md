@@ -74,7 +74,8 @@ prefabów — item jedzenia sam ma `Piece` + `WearNTear` (koszt = 1 szt. siebie)
 miał, kopiujemy z `Mushroom`. Ikony/nazwy na `Piece` synchronizowane z itemem.
 
 Ektoplazma: `EctoplasmDrops` przenosi ją na bagna — Wraith dostaje 1–4 @100%,
-Ghostowi ścięte z 1–5 na 1–2.
+Ghostowi ścięte z waniliowych 1–4 @100% (w danych min 1 / max 5, max wyłączny) na 1 szt. @10% (config).
+Trofeum Wraitha 5% → 33%.
 
 ### Zbroja
 `WraithArmor` + `ClothChain` + `DanglingChain` + `LeveledRequirements` (patch Harmony na
